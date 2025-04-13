@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -7,6 +7,7 @@ import {
   Button,
   TouchableOpacity,
   Image,
+  ScrollView,
   Alert,
   Platform,
   Linking,
@@ -16,11 +17,10 @@ import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import realm from "../realm";
 
-// Import the placeholder image directly
-import placeholderImage from "../assets/images/placeholder.png";
-
-function ManuallyAdd({ navigation }) {
+function EditPuzzle({ route, navigation }) {
+  const { puzzleId } = route.params;
   const { colors } = useTheme();
+
   const [name, setName] = useState("");
   const [brand, setBrand] = useState("");
   const [pieces, setPieces] = useState("");
@@ -120,6 +120,48 @@ function ManuallyAdd({ navigation }) {
     }
   };
 
+  // Delete image from app storage
+  const deleteImageFromAppStorage = async (imageUri) => {
+    try {
+      if (!imageUri) return false;
+
+      // Check if the file exists
+      const fileInfo = await FileSystem.getInfoAsync(imageUri);
+      if (fileInfo.exists) {
+        await FileSystem.deleteAsync(imageUri);
+        console.log("Deleted previous image:", imageUri);
+        return true;
+      } else {
+        console.log("Previous image file doesn't exist:", imageUri);
+        return false;
+      }
+    } catch (error) {
+      console.error("Error deleting previous image:", error);
+      return false;
+    }
+  };
+
+  // Load puzzle data when component mounts
+  useEffect(() => {
+    const puzzleItem = realm.objectForPrimaryKey("PuzzleItem", puzzleId);
+    if (puzzleItem) {
+      setName(puzzleItem.name || "");
+      setBrand(puzzleItem.brand || "");
+      setPieces(puzzleItem.pieces ? puzzleItem.pieces.toString() : "");
+      setNotes(puzzleItem.notes || "");
+      setBestTimeHours(
+        puzzleItem.bestTimeHours ? puzzleItem.bestTimeHours.toString() : ""
+      );
+      setBestTimeMinutes(
+        puzzleItem.bestTimeMinutes ? puzzleItem.bestTimeMinutes.toString() : ""
+      );
+      setBestTimeSeconds(
+        puzzleItem.bestTimeSeconds ? puzzleItem.bestTimeSeconds.toString() : ""
+      );
+      setImageUri(puzzleItem.imageUri);
+    }
+  }, [puzzleId]);
+
   const pickImage = async () => {
     // Request permission to access the media library
     const permissionGranted = await requestMediaLibraryPermission();
@@ -133,7 +175,7 @@ function ManuallyAdd({ navigation }) {
     });
 
     if (!result.canceled) {
-      // Delete previous image if one was already selected
+      // First, delete the previous image if it exists
       if (imageUri) {
         await deleteImageFromAppStorage(imageUri);
       }
@@ -149,9 +191,9 @@ function ManuallyAdd({ navigation }) {
   };
 
   const takePhoto = async () => {
-    // Request permission to access the camera
-    const permissionGranted = await requestCameraPermission();
-    if (!permissionGranted) return;
+    // Request camera permission before launching the camera
+    const hasPermission = await requestCameraPermission();
+    if (!hasPermission) return;
 
     let result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
@@ -160,7 +202,7 @@ function ManuallyAdd({ navigation }) {
     });
 
     if (!result.canceled) {
-      // Delete previous image if one was already selected
+      // First, delete the previous image if it exists
       if (imageUri) {
         await deleteImageFromAppStorage(imageUri);
       }
@@ -175,7 +217,7 @@ function ManuallyAdd({ navigation }) {
     }
   };
 
-  const savePuzzleItem = () => {
+  const updatePuzzleItem = () => {
     try {
       // Validate that at least a name is provided
       if (!name.trim()) {
@@ -183,38 +225,44 @@ function ManuallyAdd({ navigation }) {
         return;
       }
 
-      // Create puzzle object with all fields properly formatted
-      const puzzleToCreate = {
-        id: realm.objects("PuzzleItem").length + 1,
-        name: name.trim(),
-        brand: brand ? brand.trim() : "",
-        notes: notes ? notes.trim() : "",
-        imageUri: imageUri || null,
-      };
-
-      // Handle numeric fields with default values to avoid null
-      puzzleToCreate.pieces = pieces ? parseInt(pieces) : 0;
-      puzzleToCreate.bestTimeHours = bestTimeHours
-        ? parseInt(bestTimeHours)
-        : 0;
-      puzzleToCreate.bestTimeMinutes = bestTimeMinutes
-        ? parseInt(bestTimeMinutes)
-        : 0;
-      puzzleToCreate.bestTimeSeconds = bestTimeSeconds
-        ? parseInt(bestTimeSeconds)
-        : 0;
-
       realm.write(() => {
-        realm.create("PuzzleItem", puzzleToCreate);
+        const puzzleToUpdate = realm.objectForPrimaryKey(
+          "PuzzleItem",
+          puzzleId
+        );
+        if (puzzleToUpdate) {
+          // Text fields - use empty strings instead of null
+          puzzleToUpdate.name = name.trim();
+          puzzleToUpdate.brand = brand ? brand.trim() : "";
+          puzzleToUpdate.notes = notes ? notes.trim() : "";
+          puzzleToUpdate.imageUri = imageUri || null;
+
+          // Numeric fields - use 0 instead of null
+          puzzleToUpdate.pieces = pieces ? parseInt(pieces) : 0;
+          puzzleToUpdate.bestTimeHours = bestTimeHours
+            ? parseInt(bestTimeHours)
+            : 0;
+          puzzleToUpdate.bestTimeMinutes = bestTimeMinutes
+            ? parseInt(bestTimeMinutes)
+            : 0;
+          puzzleToUpdate.bestTimeSeconds = bestTimeSeconds
+            ? parseInt(bestTimeSeconds)
+            : 0;
+
+          console.log("Updated puzzle:", JSON.stringify(puzzleToUpdate));
+        } else {
+          console.error("Could not find puzzle with ID:", puzzleId);
+        }
       });
 
-      console.log("Puzzle saved successfully");
+      // Alert success
+      alert("Puzzle updated successfully!");
       navigation.navigate("Home");
     } catch (error) {
-      console.error("Error saving puzzle:", error);
+      console.error("Error updating puzzle:", error);
 
       // Provide more specific error messages based on the error
-      let errorMessage = "Error saving puzzle: ";
+      let errorMessage = "Error updating puzzle: ";
 
       if (error.message.includes("number or bigint")) {
         errorMessage +=
@@ -225,110 +273,113 @@ function ManuallyAdd({ navigation }) {
       } else {
         errorMessage += error.message;
       }
-
-      alert(errorMessage);
+      alert("Error updating puzzle: " + error.message);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Manually Add Puzzle Item</Text>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        <Text style={styles.text}>Edit Puzzle Item</Text>
 
-      {/* Display image at the top */}
-      <View style={styles.imageContainer}>
-        <Image
-          source={
-            imageUri
-              ? { uri: imageUri }
-              : require("../assets/images/placeholder.png")
-          }
-          style={styles.thumbnailImage}
-          defaultSource={require("../assets/images/placeholder.png")}
-        />
-      </View>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Brand"
-        value={brand}
-        onChangeText={setBrand}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Number of Pieces"
-        value={pieces}
-        onChangeText={setPieces}
-        keyboardType="numeric"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Notes"
-        value={notes}
-        onChangeText={setNotes}
-      />
-      <View style={styles.timeContainer}>
-        <Text style={styles.timeLabel}>Best Time:</Text>
-        <View style={styles.timeInputRow}>
-          <TextInput
-            style={styles.timeInput}
-            placeholder="HH"
-            value={bestTimeHours}
-            onChangeText={setBestTimeHours}
-            keyboardType="numeric"
-            maxLength={2}
-          />
-          <Text style={styles.timeSeparator}>:</Text>
-          <TextInput
-            style={styles.timeInput}
-            placeholder="MM"
-            value={bestTimeMinutes}
-            onChangeText={setBestTimeMinutes}
-            keyboardType="numeric"
-            maxLength={2}
-          />
-          <Text style={styles.timeSeparator}>:</Text>
-          <TextInput
-            style={styles.timeInput}
-            placeholder="SS"
-            value={bestTimeSeconds}
-            onChangeText={setBestTimeSeconds}
-            keyboardType="numeric"
-            maxLength={2}
-          />
+        {/* Display image at the top */}
+        <View style={styles.imageContainer}>
+          {imageUri ? (
+            <Image source={{ uri: imageUri }} style={styles.thumbnailImage} />
+          ) : (
+            <Image
+              source={require("../assets/images/placeholder.png")}
+              style={styles.thumbnailImage}
+            />
+          )}
         </View>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Name"
+          value={name}
+          onChangeText={setName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Brand"
+          value={brand}
+          onChangeText={setBrand}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Number of Pieces"
+          value={pieces}
+          onChangeText={setPieces}
+          keyboardType="numeric"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Notes"
+          value={notes}
+          onChangeText={setNotes}
+        />
+        <View style={styles.timeContainer}>
+          <Text style={styles.timeLabel}>Best Time:</Text>
+          <View style={styles.timeInputRow}>
+            <TextInput
+              style={styles.timeInput}
+              placeholder="HH"
+              value={bestTimeHours}
+              onChangeText={setBestTimeHours}
+              keyboardType="numeric"
+              maxLength={2}
+            />
+            <Text style={styles.timeSeparator}>:</Text>
+            <TextInput
+              style={styles.timeInput}
+              placeholder="MM"
+              value={bestTimeMinutes}
+              onChangeText={setBestTimeMinutes}
+              keyboardType="numeric"
+              maxLength={2}
+            />
+            <Text style={styles.timeSeparator}>:</Text>
+            <TextInput
+              style={styles.timeInput}
+              placeholder="SS"
+              value={bestTimeSeconds}
+              onChangeText={setBestTimeSeconds}
+              keyboardType="numeric"
+              maxLength={2}
+            />
+          </View>
+        </View>
+        <View style={styles.buttonContainer}>
+          <Button title="Pick an image from gallery" onPress={pickImage} />
+          <Button title="Take a photo" onPress={takePhoto} />
+        </View>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: colors.primary }]}
+          onPress={updatePuzzleItem}
+        >
+          <Text style={styles.buttonText}>Update Puzzle</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: colors.secondary }]}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.buttonText}>Cancel</Text>
+        </TouchableOpacity>
       </View>
-      <View style={styles.buttonContainer}>
-        <Button title="Pick an image from gallery" onPress={pickImage} />
-        <Button title="Take a photo" onPress={takePhoto} />
-      </View>
-      <TouchableOpacity
-        style={[styles.button, { backgroundColor: colors.primary }]}
-        onPress={savePuzzleItem}
-      >
-        <Text style={styles.buttonText}>Save Puzzle</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.button, { backgroundColor: colors.secondary }]}
-        onPress={() => navigation.goBack()}
-      >
-        <Text style={styles.buttonText}>Back to Add Puzzles</Text>
-      </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
-export default ManuallyAdd;
+export default EditPuzzle;
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    paddingVertical: 20,
+  },
   container: {
     flex: 1,
-    justifyContent: "center",
     alignItems: "center",
     padding: 16,
     backgroundColor: "#F5F7F3",
@@ -336,6 +387,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 20,
     marginBottom: 20,
+    marginTop: 40,
   },
   imageContainer: {
     width: 200,
@@ -370,6 +422,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 5,
     marginVertical: 10,
+    width: "80%",
   },
   buttonText: {
     color: "white",
