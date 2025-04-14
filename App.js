@@ -13,6 +13,8 @@ import { createStackNavigator } from "@react-navigation/stack";
 import logo from "./assets/images/logo.jpeg";
 import titleImage from "./assets/images/title.jpeg";
 import realm from "./realm";
+import * as SplashScreen from "expo-splash-screen";
+import { loadFonts } from "./utils/fontLoader";
 
 import AddPuzzles from "./components/AddPuzzles";
 import Scan from "./components/Scan";
@@ -183,6 +185,33 @@ function HomeScreen({ navigation }) {
 }
 
 export default function App() {
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  // Load fonts when component mounts
+  useEffect(() => {
+    async function prepare() {
+      try {
+        // Keep the splash screen visible while we load fonts
+        await SplashScreen.preventAutoHideAsync();
+        // Load the fonts
+        await loadFonts();
+      } catch (e) {
+        console.warn("Error loading fonts:", e);
+      } finally {
+        // Set fonts as loaded and hide splash screen
+        setFontsLoaded(true);
+        await SplashScreen.hideAsync();
+      }
+    }
+
+    prepare();
+  }, []);
+
+  // Don't render until fonts are loaded
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
     <NavigationContainer theme={MyTheme}>
       <Stack.Navigator
@@ -238,6 +267,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     textAlign: "center",
+    fontFamily: "Sora-Bold",
   },
   listItem: {
     padding: 10,
@@ -263,10 +293,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold", // Make the item name bold
     marginBottom: 5,
+    fontFamily: "Sora",
   },
   listText: {
     fontSize: 14,
     color: "#555",
+    fontFamily: "Sora-Light",
   },
   puzzleTouchable: {
     flex: 1,
@@ -307,5 +339,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     textAlign: "center",
+    fontFamily: "Sora-Bold",
   },
 });

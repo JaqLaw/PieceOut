@@ -58,6 +58,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 20,
     marginTop: 50,
+    fontFamily: "Sora-Bold",
   },
   buttonContainer: {
     marginVertical: 10,
@@ -72,5 +73,6 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     textAlign: "center",
+    fontFamily: "Sora",
   },
 });

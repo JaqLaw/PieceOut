@@ -481,6 +481,7 @@ const styles = StyleSheet.create({
   backButtonText: {
     fontSize: 18,
     color: "#555",
+    fontFamily: "Sora",
   },
   puzzleInfoContainer: {
     flexDirection: "row",
@@ -503,10 +504,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 5,
+    fontFamily: "Sora-Bold",
   },
   puzzleText: {
     fontSize: 14,
     color: "#555",
+    fontFamily: "Sora",
   },
   timerContainer: {
     alignItems: "center",
@@ -516,6 +519,7 @@ const styles = StyleSheet.create({
     fontSize: 64, // Increased from 48 to 64
     fontWeight: "bold",
     marginBottom: 20,
+    fontFamily: "Sora-Bold",
   },
   timerButtonsContainer: {
     flexDirection: "row",
@@ -541,6 +545,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+    fontFamily: "Sora-Bold",
   },
   manualTimeContainer: {
     marginVertical: 20,
@@ -556,6 +561,7 @@ const styles = StyleSheet.create({
     marginBottom: 15, // Added more space below title
     textAlign: "center", // Center text
     width: "100%",
+    fontFamily: "Sora-Bold",
   },
   timeInputRow: {
     flexDirection: "row",
@@ -574,6 +580,7 @@ const styles = StyleSheet.create({
   timeSeparator: {
     fontSize: 20,
     marginHorizontal: 5,
+    fontFamily: "Sora",
   },
   logButton: {
     marginLeft: 20,
@@ -599,6 +606,7 @@ const styles = StyleSheet.create({
   headerCell: {
     fontWeight: "bold",
     fontSize: 16,
+    fontFamily: "Sora-Bold",
   },
   tableRow: {
     flexDirection: "row",
@@ -608,12 +616,14 @@ const styles = StyleSheet.create({
   },
   tableCell: {
     fontSize: 14,
+    fontFamily: "Sora",
   },
   noRecordsText: {
     textAlign: "center",
     marginTop: 20,
     color: "#888",
     fontStyle: "italic",
+    fontFamily: "Sora",
   },
   rightActionsContainer: {
     width: 80,
@@ -632,6 +642,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
     textAlign: "center",
+    fontFamily: "Sora-Bold",
   },
 });
 

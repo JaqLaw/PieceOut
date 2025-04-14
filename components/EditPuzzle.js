@@ -337,6 +337,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginBottom: 20,
     marginTop: 40,
+    fontFamily: "Sora",
   },
   imageContainer: {
     width: 200,
@@ -361,6 +362,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 5,
+    fontFamily: "Sora",
   },
   buttonContainer: {
     marginVertical: 10,
@@ -377,6 +379,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     textAlign: "center",
+    fontFamily: "Sora-Bold",
   },
   image: {
     width: 200,
@@ -390,6 +393,7 @@ const styles = StyleSheet.create({
   timeLabel: {
     fontSize: 16,
     marginBottom: 5,
+    fontFamily: "Sora",
   },
   timeInputRow: {
     flexDirection: "row",
@@ -403,9 +407,11 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 5,
     textAlign: "center",
+    fontFamily: "Sora",
   },
   timeSeparator: {
     fontSize: 20,
     marginHorizontal: 5,
+    fontFamily: "Sora",
   },
 });
