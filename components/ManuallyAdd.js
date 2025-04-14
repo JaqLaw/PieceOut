@@ -25,9 +25,6 @@ function ManuallyAdd({ navigation }) {
   const [brand, setBrand] = useState("");
   const [pieces, setPieces] = useState("");
   const [notes, setNotes] = useState("");
-  const [bestTimeHours, setBestTimeHours] = useState("");
-  const [bestTimeMinutes, setBestTimeMinutes] = useState("");
-  const [bestTimeSeconds, setBestTimeSeconds] = useState("");
   const [imageUri, setImageUri] = useState(null);
 
   // Function to request camera permissions
@@ -194,15 +191,10 @@ function ManuallyAdd({ navigation }) {
 
       // Handle numeric fields with default values to avoid null
       puzzleToCreate.pieces = pieces ? parseInt(pieces) : 0;
-      puzzleToCreate.bestTimeHours = bestTimeHours
-        ? parseInt(bestTimeHours)
-        : 0;
-      puzzleToCreate.bestTimeMinutes = bestTimeMinutes
-        ? parseInt(bestTimeMinutes)
-        : 0;
-      puzzleToCreate.bestTimeSeconds = bestTimeSeconds
-        ? parseInt(bestTimeSeconds)
-        : 0;
+      // Best time will be calculated automatically from time records
+      puzzleToCreate.bestTimeHours = 0;
+      puzzleToCreate.bestTimeMinutes = 0;
+      puzzleToCreate.bestTimeSeconds = 0;
 
       realm.write(() => {
         realm.create("PuzzleItem", puzzleToCreate);
@@ -272,37 +264,6 @@ function ManuallyAdd({ navigation }) {
         value={notes}
         onChangeText={setNotes}
       />
-      <View style={styles.timeContainer}>
-        <Text style={styles.timeLabel}>Best Time:</Text>
-        <View style={styles.timeInputRow}>
-          <TextInput
-            style={styles.timeInput}
-            placeholder="HH"
-            value={bestTimeHours}
-            onChangeText={setBestTimeHours}
-            keyboardType="numeric"
-            maxLength={2}
-          />
-          <Text style={styles.timeSeparator}>:</Text>
-          <TextInput
-            style={styles.timeInput}
-            placeholder="MM"
-            value={bestTimeMinutes}
-            onChangeText={setBestTimeMinutes}
-            keyboardType="numeric"
-            maxLength={2}
-          />
-          <Text style={styles.timeSeparator}>:</Text>
-          <TextInput
-            style={styles.timeInput}
-            placeholder="SS"
-            value={bestTimeSeconds}
-            onChangeText={setBestTimeSeconds}
-            keyboardType="numeric"
-            maxLength={2}
-          />
-        </View>
-      </View>
       <View style={styles.buttonContainer}>
         <Button title="Pick an image from gallery" onPress={pickImage} />
         <Button title="Take a photo" onPress={takePhoto} />

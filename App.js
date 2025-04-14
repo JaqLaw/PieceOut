@@ -6,6 +6,7 @@ import {
   Text,
   TouchableOpacity,
   FlatList,
+  Alert,
 } from "react-native";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -18,6 +19,7 @@ import Scan from "./components/Scan";
 import Search from "./components/Search";
 import ManuallyAdd from "./components/ManuallyAdd";
 import EditPuzzle from "./components/EditPuzzle";
+import Timer from "./components/Timer";
 
 const Stack = createStackNavigator();
 const AddPuzzlesStack = createStackNavigator();
@@ -38,30 +40,63 @@ function HomeScreen({ navigation }) {
   useEffect(() => {
     const refreshPuzzles = () => {
       const items = realm.objects("PuzzleItem");
-      console.log("Found puzzle items:", items.length, JSON.stringify(Array.from(items)));
+      console.log(
+        "Found puzzle items:",
+        items.length,
+        JSON.stringify(Array.from(items))
+      );
       setPuzzleItems(Array.from(items)); // Convert to regular array to force refresh
     };
-    
+
     // Refresh immediately
     refreshPuzzles();
-    
+
     // Add listener for when screen comes into focus
-    const unsubscribe = navigation.addListener('focus', refreshPuzzles);
-    
+    const unsubscribe = navigation.addListener("focus", refreshPuzzles);
+
     // Clean up listener on unmount
     return unsubscribe;
   }, [navigation]);
-  
+
   const deletePuzzleItem = (id) => {
     try {
-      realm.write(() => {
-        const itemToDelete = realm.objectForPrimaryKey("PuzzleItem", id);
-        if (itemToDelete) {
-          realm.delete(itemToDelete);
-          // Refresh the list after deletion
-          setPuzzleItems(realm.objects("PuzzleItem"));
-        }
-      });
+      const itemToDelete = realm.objectForPrimaryKey("PuzzleItem", id);
+      if (itemToDelete) {
+        // Show confirmation dialog with the puzzle name
+        Alert.alert(
+          "Confirm Deletion",
+          `Are you sure you want to delete "${itemToDelete.name}"?`,
+          [
+            {
+              text: "Cancel",
+              style: "cancel",
+            },
+            {
+              text: "Delete",
+              onPress: () => {
+                realm.write(() => {
+                  // First, delete all TimeRecords associated with this puzzle
+                  const relatedTimeRecords = realm
+                    .objects("TimeRecord")
+                    .filtered("puzzleId == $0", id);
+
+                  // Delete each time record
+                  relatedTimeRecords.forEach((record) => {
+                    realm.delete(record);
+                  });
+
+                  // Then delete the puzzle item itself
+                  realm.delete(itemToDelete);
+
+                  // Refresh the list after deletion
+                  setPuzzleItems(realm.objects("PuzzleItem"));
+                });
+              },
+              style: "destructive",
+            },
+          ]
+        );
+      }
     } catch (error) {
       console.error("Error deleting item:", error);
     }
@@ -78,7 +113,7 @@ function HomeScreen({ navigation }) {
           style={[styles.button, { backgroundColor: MyTheme.colors.primary }]}
           onPress={() => navigation.navigate("Add Puzzles")}
         >
-          <Text style={styles.buttonText}>Add Puzzles</Text>
+          <Text style={styles.buttonText}>Add Puzzle</Text>
         </TouchableOpacity>
       </View>
       <FlatList
@@ -86,39 +121,60 @@ function HomeScreen({ navigation }) {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.listItem}>
-            <TouchableOpacity 
-              style={styles.itemTouchable}
-              onPress={() => navigation.navigate("Edit Puzzle", { puzzleId: item.id })}
-              activeOpacity={0.7}
-            >
-              <Image
-                source={
-                  item.imageUri
-                    ? { uri: item.imageUri }
-                    : require("./assets/images/placeholder.png") // Add a placeholder image
+            <View style={styles.itemContainer}>
+              <TouchableOpacity
+                style={styles.puzzleTouchable}
+                onPress={() =>
+                  navigation.navigate("Timer", { puzzleId: item.id })
                 }
-                style={styles.listImage}
-              />
-              <View style={styles.listTextContainer}>
-                <Text style={styles.listTitle}>{item.name}</Text>
-                <Text style={styles.listText}>{item.brand}</Text>
-                <Text style={styles.listText}>{item.pieces} pieces</Text>
-                <Text style={styles.listText}>Notes: {item.notes}</Text>
-                <Text style={styles.listText}>
-                  Best Time: {
-                    `${String(item.bestTimeHours || 0).padStart(2, '0')}:${
-                    String(item.bestTimeMinutes || 0).padStart(2, '0')}:${
-                    String(item.bestTimeSeconds || 0).padStart(2, '0')}`
+              >
+                <View style={styles.contentRow}>
+                  <Image
+                    source={
+                      item.imageUri
+                        ? { uri: item.imageUri }
+                        : require("./assets/images/placeholder.png") // Add a placeholder image
+                    }
+                    style={styles.listImage}
+                  />
+                  <View style={styles.listTextContainer}>
+                    <Text style={styles.listTitle}>{item.name}</Text>
+                    <Text style={styles.listText}>{item.brand}</Text>
+                    <Text style={styles.listText}>{item.pieces} pieces</Text>
+                    <Text style={styles.listText}>Notes: {item.notes}</Text>
+                    <Text style={styles.listText}>
+                      Best Time:{" "}
+                      {`${String(item.bestTimeHours || 0).padStart(
+                        2,
+                        "0"
+                      )}:${String(item.bestTimeMinutes || 0).padStart(
+                        2,
+                        "0"
+                      )}:${String(item.bestTimeSeconds || 0).padStart(2, "0")}`}
+                    </Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+              <View style={styles.buttonsColumn}>
+                <TouchableOpacity
+                  style={[
+                    styles.editButton,
+                    { backgroundColor: MyTheme.colors.primary },
+                  ]}
+                  onPress={() =>
+                    navigation.navigate("Edit Puzzle", { puzzleId: item.id })
                   }
-                </Text>
+                >
+                  <Text style={styles.buttonText}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => deletePuzzleItem(item.id)}
+                >
+                  <Text style={styles.deleteButtonText}>Delete</Text>
+                </TouchableOpacity>
               </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={() => deletePuzzleItem(item.id)}
-            >
-              <Text style={styles.deleteButtonText}>Delete</Text>
-            </TouchableOpacity>
+            </View>
           </View>
         )}
       />
@@ -139,6 +195,7 @@ export default function App() {
         <Stack.Screen name="Search" component={Search} />
         <Stack.Screen name="Manually Add" component={ManuallyAdd} />
         <Stack.Screen name="Edit Puzzle" component={EditPuzzle} />
+        <Stack.Screen name="Timer" component={Timer} />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -183,16 +240,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   listItem: {
-    flexDirection: "row", // Arrange image and text side by side
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
-    alignItems: "center",
   },
-  itemTouchable: {
-    flex: 1,
-    flexDirection: "row",
+  itemContainer: {
+    flexDirection: "row", // Arrange image and text side by side
     alignItems: "center",
+    marginBottom: 10,
+    justifyContent: "space-between",
   },
   listImage: {
     width: 100,
@@ -212,13 +268,39 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#555",
   },
+  puzzleTouchable: {
+    flex: 1,
+    flexDirection: "row",
+  },
+  contentRow: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  buttonsContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 5,
+  },
+  buttonsColumn: {
+    flexDirection: "column",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginLeft: 10,
+  },
+  editButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    justifyContent: "center",
+    marginBottom: 10,
+  },
   deleteButton: {
     backgroundColor: "#9e2424",
     paddingVertical: 8,
     paddingHorizontal: 15,
     borderRadius: 5,
     justifyContent: "center",
-    marginLeft: 10,
   },
   deleteButtonText: {
     color: "white",
