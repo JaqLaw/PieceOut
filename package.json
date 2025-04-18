@@ -15,6 +15,7 @@
     "@realm/react": "^0.11.0",
     "expo": "~50.0.11",
     "expo-asset": "~9.0.2",
+    "expo-constants": "~15.4.6",
     "expo-dev-client": "~3.3.12",
     "expo-file-system": "~16.0.9",
     "expo-image-picker": "~14.7.1",
@@ -26,9 +27,9 @@
     "react-native-gesture-handler": "~2.14.0",
     "react-native-safe-area-context": "^5.2.0",
     "react-native-screens": "^4.9.1",
+    "react-native-vector-icons": "^10.2.0",
     "react-native-web": "~0.19.6",
-    "realm": "^20.1.0",
-    "expo-constants": "~15.4.6"
+    "realm": "^20.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

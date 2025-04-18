@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { Swipeable } from "react-native-gesture-handler";
+import Icon from "react-native-vector-icons/FontAwesome";
 import realm from "../realm";
 
 function Timer({ route, navigation }) {
@@ -370,13 +371,15 @@ function Timer({ route, navigation }) {
             ]}
             onPress={toggleTimer}
           >
-            <Text style={styles.buttonText}>
-              {isRunning ? "Pause" : "Start"}
-            </Text>
+            <Icon name={isRunning ? "pause" : "play"} size={30} color="white" />
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.timerButton, { backgroundColor: colors.primary }]}
+            style={[
+              styles.timerButton,
+              styles.submitButton,
+              { backgroundColor: colors.primary },
+            ]}
             onPress={submitStopwatchTime}
           >
             <Text style={styles.buttonText}>Submit</Text>
@@ -552,6 +555,7 @@ const styles = StyleSheet.create({
   timerButtonsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center", // Add this to vertically center the buttons
     width: "100%",
     paddingHorizontal: 20,
   },
@@ -564,10 +568,19 @@ const styles = StyleSheet.create({
   },
   resetButton: {
     backgroundColor: "#9e2424", // Same style as delete button
+    height: 40, // Half the height of the play/pause button
+  },
+  submitButton: {
+    height: 40, // Half the height of the play/pause button
   },
   toggleButton: {
-    paddingVertical: 15,
-    paddingHorizontal: 40,
+    width: 80, // Make it square by giving explicit width
+    height: 80, // Make it square by giving explicit height
+    padding: 0, // Remove padding to better control dimensions
+    borderRadius: 10, // Slightly rounded corners for a square shape
+    marginHorizontal: 10, // Add some horizontal margin to center it better
+    alignItems: "center",
+    justifyContent: "center",
   },
   buttonText: {
     color: "white",
