@@ -287,6 +287,21 @@ function Timer({ route, navigation }) {
     });
   };
 
+  // Get the best (highest) PPM from all time records for this puzzle
+  const getBestPPM = () => {
+    if (!timeRecords || timeRecords.length === 0) return "0.00";
+
+    // Find the highest PPM value
+    let bestPPM = 0;
+    timeRecords.forEach((record) => {
+      if (record.ppm > bestPPM) {
+        bestPPM = record.ppm;
+      }
+    });
+
+    return bestPPM.toFixed(2);
+  };
+
   if (!puzzleItem) {
     return (
       <View style={styles.container}>
@@ -319,6 +334,19 @@ function Timer({ route, navigation }) {
           <Text style={styles.puzzleName}>{puzzleItem.name}</Text>
           <Text style={styles.puzzleText}>{puzzleItem.brand}</Text>
           <Text style={styles.puzzleText}>{puzzleItem.pieces} pieces</Text>
+        </View>
+        <View style={styles.bestTimeContainer}>
+          <Text style={styles.bestTimeLabel}>Best Time</Text>
+          <Text style={styles.bestTimeText}>
+            {`${String(puzzleItem.bestTimeHours).padStart(2, "0")}:${String(
+              puzzleItem.bestTimeMinutes
+            ).padStart(2, "0")}:${String(puzzleItem.bestTimeSeconds).padStart(
+              2,
+              "0"
+            )}`}
+          </Text>
+          <Text style={styles.bestTimeLabel}>Best PPM</Text>
+          <Text style={styles.bestTimeText}>{getBestPPM()}</Text>
         </View>
       </View>
 
@@ -642,6 +670,22 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
     textAlign: "center",
+    fontFamily: "Sora-Bold",
+  },
+  bestTimeContainer: {
+    marginLeft: "auto",
+    alignItems: "flex-end",
+    justifyContent: "center",
+  },
+  bestTimeLabel: {
+    fontSize: 12,
+    color: "#555",
+    fontFamily: "Sora",
+    marginTop: 5,
+  },
+  bestTimeText: {
+    fontSize: 14,
+    fontWeight: "bold",
     fontFamily: "Sora-Bold",
   },
 });
