@@ -9,10 +9,12 @@ import {
   ScrollView,
   FlatList,
   Alert,
+  AppState,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { Swipeable } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/FontAwesome";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import realm from "../realm";
 
 function Timer({ route, navigation }) {
@@ -25,6 +27,8 @@ function Timer({ route, navigation }) {
   const [isRunning, setIsRunning] = useState(false);
   const [time, setTime] = useState(0); // time in seconds
   const timerRef = useRef(null);
+  const appStateRef = useRef(AppState.currentState);
+  const lastTimeRef = useRef({ time: 0, timestamp: Date.now() });
 
   // Manual time entry
   const [hours, setHours] = useState("");
@@ -43,14 +47,121 @@ function Timer({ route, navigation }) {
     setTimeRecords(Array.from(records).sort((a, b) => b.date - a.date)); // Sort by date, newest first
   }, [puzzleId]);
 
+  // Handle app state changes to keep timer running even when phone is locked
   useEffect(() => {
-    // Cleanup timer when component unmounts
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (
+        appStateRef.current.match(/inactive|background/) &&
+        nextAppState === "active" &&
+        isRunning
+      ) {
+        // App has come to the foreground and timer is running
+        const now = Date.now();
+        const elapsedSeconds = Math.floor(
+          (now - lastTimeRef.current.timestamp) / 1000
+        );
+
+        // Update timer with elapsed time
+        setTime((prevTime) => {
+          const newTime = prevTime + elapsedSeconds;
+          return newTime;
+        });
+
+        // Update last timestamp
+        lastTimeRef.current = {
+          time: lastTimeRef.current.time + elapsedSeconds,
+          timestamp: now,
+        };
+      } else if (
+        appStateRef.current === "active" &&
+        nextAppState.match(/inactive|background/) &&
+        isRunning
+      ) {
+        // App is going to background but timer is running
+        // Save current state for when we return
+        lastTimeRef.current = {
+          time: time,
+          timestamp: Date.now(),
+        };
+      }
+
+      // Update the appState reference
+      appStateRef.current = nextAppState;
+    });
+
+    // Load saved timer state if any
+    const loadSavedTimer = async () => {
+      try {
+        const savedTimerState = await AsyncStorage.getItem("timer_state");
+        if (savedTimerState) {
+          const {
+            time: savedTime,
+            puzzleId: savedPuzzleId,
+            isRunning: wasRunning,
+            timestamp,
+          } = JSON.parse(savedTimerState);
+          if (savedPuzzleId === puzzleId) {
+            // If it was running when saved, calculate elapsed time
+            if (wasRunning) {
+              const now = Date.now();
+              const elapsedSeconds = Math.floor((now - timestamp) / 1000);
+              setTime(savedTime + elapsedSeconds);
+              setIsRunning(true);
+
+              lastTimeRef.current = {
+                time: savedTime + elapsedSeconds,
+                timestamp: now,
+              };
+
+              // Start timer again
+              timerRef.current = setInterval(() => {
+                setTime((prevTime) => prevTime + 1);
+              }, 1000);
+            } else {
+              // It was paused, just restore the saved time
+              setTime(savedTime);
+              setIsRunning(false);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error loading saved timer:", error);
+      }
+    };
+
+    loadSavedTimer();
+
+    // Cleanup function
     return () => {
+      subscription.remove();
+
+      // Save timer state when unmounting, whether running or paused
+      saveTimerState();
+
+      // Clear interval
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
     };
-  }, []);
+  }, [puzzleId]);
+
+  // Save current timer state to AsyncStorage
+  const saveTimerState = async () => {
+    try {
+      // Always save the timer state, whether running or paused
+      await AsyncStorage.setItem(
+        "timer_state",
+        JSON.stringify({
+          time,
+          puzzleId,
+          isRunning,
+          timestamp: Date.now(),
+        })
+      );
+    } catch (error) {
+      console.error("Error saving timer state:", error);
+    }
+  };
 
   // Calculate formatted time string (HH:MM:SS) from seconds
   const formatTime = (totalSeconds) => {
@@ -76,13 +187,32 @@ function Timer({ route, navigation }) {
   // Start or pause stopwatch
   const toggleTimer = () => {
     if (isRunning) {
+      // When pausing the timer
       clearInterval(timerRef.current);
+
+      // Don't remove state, just update it with isRunning=false
+      // This preserves the current time when paused
     } else {
+      // When starting the timer
       timerRef.current = setInterval(() => {
         setTime((prevTime) => prevTime + 1);
       }, 1000);
+
+      // Save timestamp when timer started
+      lastTimeRef.current = {
+        time: time,
+        timestamp: Date.now(),
+      };
     }
+
+    // Update running state
     setIsRunning(!isRunning);
+
+    // After state has been updated, save the timer state
+    // We delay this slightly to ensure the isRunning state is updated first
+    setTimeout(() => {
+      saveTimerState();
+    }, 0);
   };
 
   // Reset stopwatch
@@ -90,6 +220,9 @@ function Timer({ route, navigation }) {
     clearInterval(timerRef.current);
     setIsRunning(false);
     setTime(0);
+
+    // Clear saved timer state
+    AsyncStorage.removeItem("timer_state");
   };
 
   // Submit stopwatch time
@@ -263,18 +396,6 @@ function Timer({ route, navigation }) {
     );
   };
 
-  // Render right actions for swipeable
-  const renderRightActions = (item) => {
-    return (
-      <TouchableOpacity
-        style={styles.deleteAction}
-        onPress={() => deleteTimeRecord(item.id)}
-      >
-        <Text style={styles.deleteActionText}>Delete</Text>
-      </TouchableOpacity>
-    );
-  };
-
   // Format date for display
   const formatDate = (date) => {
     return date.toLocaleDateString(undefined, {
@@ -335,12 +456,13 @@ function Timer({ route, navigation }) {
         <View style={styles.bestTimeContainer}>
           <Text style={styles.bestTimeLabel}>Best Time</Text>
           <Text style={styles.bestTimeText}>
-            {`${String(puzzleItem.bestTimeHours).padStart(2, "0")}:${String(
-              puzzleItem.bestTimeMinutes
-            ).padStart(2, "0")}:${String(puzzleItem.bestTimeSeconds).padStart(
+            {`${String(puzzleItem.bestTimeHours || 0).padStart(
               2,
               "0"
-            )}`}
+            )}:${String(puzzleItem.bestTimeMinutes || 0).padStart(
+              2,
+              "0"
+            )}:${String(puzzleItem.bestTimeSeconds || 0).padStart(2, "0")}`}
           </Text>
           <Text style={styles.bestTimeLabel}>Best PPM</Text>
           <Text style={styles.bestTimeText}>{getBestPPM()}</Text>

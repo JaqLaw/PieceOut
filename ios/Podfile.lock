@@ -1150,6 +1150,8 @@ PODS:
     - React-perflogger (= 0.73.4)
   - RealmJS (20.1.0):
     - React
+  - RNCAsyncStorage (2.1.2):
+    - React-Core
   - RNGestureHandler (2.14.1):
     - glog
     - RCT-Folly (= 2022.05.16.00)
@@ -1234,6 +1236,7 @@ DEPENDENCIES:
   - React-utils (from `../node_modules/react-native/ReactCommon/react/utils`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - RealmJS (from `../node_modules/realm`)
+  - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
@@ -1375,6 +1378,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   RealmJS:
     :path: "../node_modules/realm"
+  RNCAsyncStorage:
+    :path: "../node_modules/@react-native-async-storage/async-storage"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
   RNScreens:
@@ -1451,6 +1456,7 @@ SPEC CHECKSUMS:
   React-utils: 8439db27c3745f6de9d67eb61f5600c8d624274c
   ReactCommon: cc18bd33c0fab03c67620da6a602dcc1704e66b4
   RealmJS: 9fd51c849eb552ade9f7b11db42a319b4f6cab4c
+  RNCAsyncStorage: b9f5f78da5d16a853fe3dc22e8268d932fc45a83
   RNGestureHandler: 55447e4051459b0b7f5f5173567f92286d01cf88
   RNScreens: 0656dcb48f92d13a4d04f3b6c3ed800fa214c6a0
   RNVectorIcons: 36b9fb776f0d0722582af7c5cbde94a4157c6914

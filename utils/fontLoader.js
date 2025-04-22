@@ -5,14 +5,13 @@ export const loadFonts = async () => {
     // Define the font file path
     const soraFontPath = require("../assets/fonts/Sora-VariableFont_wght.ttf");
 
-    // Load the font with Font.loadAsync
+    // Load only the base font name - this will work for all font styles
+    // when referenced in your app
     await Font.loadAsync({
       Sora: soraFontPath,
-      "Sora-Regular": soraFontPath,
-      "Sora-Light": soraFontPath,
-      "Sora-Medium": soraFontPath,
-      "Sora-Bold": soraFontPath,
     });
+
+    console.log("Font loaded successfully");
   } catch (error) {
     console.error("Error in loadFonts:", error);
     throw error;
