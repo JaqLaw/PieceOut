@@ -13,8 +13,6 @@ export const loadFonts = async () => {
       "Sora-Medium": soraFontPath,
       "Sora-Bold": soraFontPath,
     });
-
-    console.log("Fonts loaded successfully");
   } catch (error) {
     console.error("Error in loadFonts:", error);
     throw error;

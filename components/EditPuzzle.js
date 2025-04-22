@@ -108,7 +108,6 @@ function EditPuzzle({ route, navigation }) {
         to: newUri,
       });
 
-      console.log("Image saved to app storage:", newUri);
       return newUri;
     } catch (error) {
       console.error("Error saving image to app storage:", error);
@@ -126,14 +125,11 @@ function EditPuzzle({ route, navigation }) {
       const fileInfo = await FileSystem.getInfoAsync(imageUri);
       if (fileInfo.exists) {
         await FileSystem.deleteAsync(imageUri);
-        console.log("Deleted previous image:", imageUri);
         return true;
       } else {
-        console.log("Previous image file doesn't exist:", imageUri);
         return false;
       }
     } catch (error) {
-      console.error("Error deleting previous image:", error);
       return false;
     }
   };
@@ -173,7 +169,6 @@ function EditPuzzle({ route, navigation }) {
       const permanentUri = await saveImageToAppStorage(originalUri);
       if (permanentUri) {
         setImageUri(permanentUri);
-        console.log("Gallery image saved permanently:", permanentUri);
       }
     }
   };
@@ -200,7 +195,6 @@ function EditPuzzle({ route, navigation }) {
       const permanentUri = await saveImageToAppStorage(originalUri);
       if (permanentUri) {
         setImageUri(permanentUri);
-        console.log("Camera photo saved permanently:", permanentUri);
       }
     }
   };
@@ -228,8 +222,6 @@ function EditPuzzle({ route, navigation }) {
           // Numeric fields - use 0 instead of null
           puzzleToUpdate.pieces = pieces ? parseInt(pieces) : 0;
           // Best time is now calculated automatically from time records
-
-          console.log("Updated puzzle:", JSON.stringify(puzzleToUpdate));
         } else {
           console.error("Could not find puzzle with ID:", puzzleId);
         }

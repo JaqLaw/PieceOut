@@ -1,7 +1,5 @@
 import Realm from "realm";
 
-// Log Realm path to help debugging
-console.log("Default Realm path:", Realm.defaultPath);
 
 class PuzzleItem extends Realm.Object {}
 PuzzleItem.schema = {

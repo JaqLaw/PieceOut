@@ -42,11 +42,6 @@ function HomeScreen({ navigation }) {
   useEffect(() => {
     const refreshPuzzles = () => {
       const items = realm.objects("PuzzleItem");
-      console.log(
-        "Found puzzle items:",
-        items.length,
-        JSON.stringify(Array.from(items))
-      );
       setPuzzleItems(Array.from(items)); // Convert to regular array to force refresh
     };
 

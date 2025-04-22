@@ -108,7 +108,6 @@ function ManuallyAdd({ navigation }) {
         to: newUri,
       });
 
-      console.log("Image saved to app storage:", newUri);
       return newUri;
     } catch (error) {
       console.error("Error saving image to app storage:", error);
@@ -140,7 +139,6 @@ function ManuallyAdd({ navigation }) {
       const permanentUri = await saveImageToAppStorage(originalUri);
       if (permanentUri) {
         setImageUri(permanentUri);
-        console.log("Gallery image saved permanently:", permanentUri);
       }
     }
   };
@@ -167,7 +165,6 @@ function ManuallyAdd({ navigation }) {
       const permanentUri = await saveImageToAppStorage(originalUri);
       if (permanentUri) {
         setImageUri(permanentUri);
-        console.log("Camera photo saved permanently:", permanentUri);
       }
     }
   };
@@ -200,7 +197,6 @@ function ManuallyAdd({ navigation }) {
         realm.create("PuzzleItem", puzzleToCreate);
       });
 
-      console.log("Puzzle saved successfully");
       navigation.navigate("Home");
     } catch (error) {
       console.error("Error saving puzzle:", error);

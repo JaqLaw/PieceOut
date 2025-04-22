@@ -214,10 +214,6 @@ function Timer({ route, navigation }) {
           puzzle.bestTimeSeconds = fastestTime % 60;
         });
       }
-
-      console.log(
-        `Updated best time for puzzle ${puzzleId} to ${puzzle.bestTimeHours}:${puzzle.bestTimeMinutes}:${puzzle.bestTimeSeconds}`
-      );
     } catch (error) {
       console.error("Error updating best time:", error);
     }
@@ -442,6 +438,8 @@ function Timer({ route, navigation }) {
           <Text style={styles.noRecordsText}>No times recorded yet</Text>
         ) : (
           <FlatList
+            style={styles.recordsList}
+            contentContainerStyle={styles.recordsListContent}
             data={timeRecords}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
@@ -635,6 +633,15 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#ccc",
     paddingTop: 15,
+    display: "flex",
+    flexDirection: "column",
+  },
+  recordsList: {
+    flex: 1,
+    width: "100%",
+  },
+  recordsListContent: {
+    paddingBottom: 10,
   },
   tableHeader: {
     flexDirection: "row",
