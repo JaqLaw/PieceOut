@@ -184,6 +184,7 @@ function ManuallyAdd({ navigation }) {
         brand: brand ? brand.trim() : "",
         notes: notes ? notes.trim() : "",
         imageUri: imageUri || null,
+        createdAt: new Date(), // Set creation date for sorting
       };
 
       // Handle numeric fields with default values to avoid null
@@ -334,7 +335,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     textAlign: "center",
-    fontFamily: "Sora",
+    fontFamily: "Sora-Bold",
   },
   image: {
     width: 200,

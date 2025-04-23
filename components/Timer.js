@@ -268,6 +268,7 @@ function Timer({ route, navigation }) {
       const ppm = calculatePPM(timeInSeconds, pieces);
 
       realm.write(() => {
+        // Create the time record
         realm.create("TimeRecord", {
           id: Math.floor(Date.now() + Math.random() * 1000), // Unique ID
           puzzleId: puzzleId,
@@ -275,6 +276,9 @@ function Timer({ route, navigation }) {
           timeInSeconds: timeInSeconds,
           ppm: parseFloat(ppm),
         });
+
+        // Update the puzzle's lastCompletedAt date
+        puzzleItem.lastCompletedAt = new Date();
 
         // Refresh time records
         const records = realm

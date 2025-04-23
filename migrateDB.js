@@ -1,5 +1,7 @@
-import Realm from "realm";
+// filepath: /Users/jaq/PieceOut/migrateDB.js
+const Realm = require("realm");
 
+// Define the schemas (duplicate them here for this script only)
 class PuzzleItem extends Realm.Object {}
 PuzzleItem.schema = {
   name: "PuzzleItem",
@@ -19,24 +21,20 @@ PuzzleItem.schema = {
   primaryKey: "id",
 };
 
-// Check if we need to delete the existing Realm file to force a new schema
-const deletePreviousRealm = false; // Set to false when you're ready to go to production
+class TimeRecord extends Realm.Object {}
+TimeRecord.schema = {
+  name: "TimeRecord",
+  properties: {
+    id: "int",
+    puzzleId: "int",
+    date: "date",
+    timeInSeconds: "int",
+    ppm: "float",
+  },
+  primaryKey: "id",
+};
 
-if (deletePreviousRealm) {
-  try {
-    // Get path to Realm file
-    const path = Realm.defaultPath;
-    console.log("Trying to delete Realm file at:", path);
-
-    // Delete Realm file
-    Realm.deleteFile({ path });
-    console.log("Successfully deleted Realm file, will create fresh database");
-  } catch (error) {
-    console.error("Error deleting Realm file:", error);
-  }
-}
-
-// Define the migration function
+// Migration function
 const migrationFunction = (oldRealm, newRealm) => {
   console.log("Running migration...");
 
@@ -44,6 +42,8 @@ const migrationFunction = (oldRealm, newRealm) => {
   if (oldRealm.schema.length > 0) {
     const oldObjects = oldRealm.objects("PuzzleItem");
     const newObjects = newRealm.objects("PuzzleItem");
+
+    console.log(`Found ${oldObjects.length} puzzles to migrate`);
 
     // For each old object, make sure time fields are properly initialized
     for (let i = 0; i < oldObjects.length; i++) {
@@ -57,12 +57,12 @@ const migrationFunction = (oldRealm, newRealm) => {
 
       // Initialize new date fields
       if (!newObject.createdAt) {
-        newObject.createdAt = new Date(); // Set to current date for existing puzzles
+        newObject.createdAt = new Date();
+        console.log(`Set createdAt for puzzle "${newObject.name}"`);
       }
 
       // Initialize lastCompletedAt based on if there are time records
       if (!newObject.lastCompletedAt) {
-        // We'll set this to null for now, and update it when looking at TimeRecords
         newObject.lastCompletedAt = null;
       }
     }
@@ -86,6 +86,9 @@ const migrationFunction = (oldRealm, newRealm) => {
 
             if (latestRecord) {
               newObjects[i].lastCompletedAt = latestRecord.date;
+              console.log(
+                `Set lastCompletedAt for puzzle "${newObjects[i].name}" to ${latestRecord.date}`
+              );
             }
           }
         }
@@ -98,25 +101,55 @@ const migrationFunction = (oldRealm, newRealm) => {
   console.log("Migration completed");
 };
 
-// TimeRecord schema for storing puzzle completion times
-class TimeRecord extends Realm.Object {}
-TimeRecord.schema = {
-  name: "TimeRecord",
-  properties: {
-    id: "int",
-    puzzleId: "int",
-    date: "date",
-    timeInSeconds: "int",
-    ppm: "float",
-  },
-  primaryKey: "id",
-};
+// Main function
+async function runMigration() {
+  try {
+    console.log("Starting manual database migration process...");
 
-// Create the realm with migration
-const realm = new Realm({
-  schema: [PuzzleItem, TimeRecord],
-  schemaVersion: 4, // Increment this when you change your schema
-  migration: migrationFunction,
-});
+    // Get current schema version
+    const path = Realm.defaultPath;
+    const currentVersion = Realm.schemaVersion(path);
+    console.log(`Database path: ${path}`);
+    console.log(`Current schema version: ${currentVersion}`);
+    console.log(`Target schema version: 4`);
 
-export default realm;
+    // Open realm with migration
+    const realm = new Realm({
+      schema: [PuzzleItem, TimeRecord],
+      schemaVersion: 4,
+      path: path,
+      migration: migrationFunction,
+    });
+
+    // Print some information about the migrated database
+    const puzzles = realm.objects("PuzzleItem");
+    console.log(`Total puzzles after migration: ${puzzles.length}`);
+
+    // Check if new fields were populated
+    let puzzlesWithCreatedAt = 0;
+    let puzzlesWithLastCompleted = 0;
+
+    for (let i = 0; i < puzzles.length; i++) {
+      const puzzle = puzzles[i];
+      if (puzzle.createdAt) puzzlesWithCreatedAt++;
+      if (puzzle.lastCompletedAt) puzzlesWithLastCompleted++;
+    }
+
+    console.log(
+      `Puzzles with createdAt date: ${puzzlesWithCreatedAt}/${puzzles.length}`
+    );
+    console.log(
+      `Puzzles with lastCompletedAt date: ${puzzlesWithLastCompleted}/${puzzles.length}`
+    );
+
+    // Close the realm
+    realm.close();
+
+    console.log("Migration completed successfully!");
+  } catch (error) {
+    console.error("Migration failed:", error);
+  }
+}
+
+// Run the migration
+runMigration();
