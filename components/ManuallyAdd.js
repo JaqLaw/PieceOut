@@ -4,7 +4,6 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   TouchableOpacity,
   Image,
   Alert,
@@ -14,6 +13,7 @@ import {
 import { useTheme } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
+import { MaterialIcons } from "@expo/vector-icons";
 import realm from "../realm";
 
 // Import the placeholder image directly
@@ -261,9 +261,20 @@ function ManuallyAdd({ navigation }) {
         value={notes}
         onChangeText={setNotes}
       />
-      <View style={styles.buttonContainer}>
-        <Button title="Pick an image from gallery" onPress={pickImage} />
-        <Button title="Take a photo" onPress={takePhoto} />
+      <View style={styles.iconButtonContainer}>
+        <TouchableOpacity style={styles.iconButton} onPress={pickImage}>
+          <MaterialIcons
+            name="photo-library"
+            size={40}
+            color={colors.primary}
+          />
+          <Text style={styles.iconButtonText}>Gallery</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.iconButton} onPress={takePhoto}>
+          <MaterialIcons name="camera-alt" size={40} color={colors.primary} />
+          <Text style={styles.iconButtonText}>Camera</Text>
+        </TouchableOpacity>
       </View>
       <TouchableOpacity
         style={[styles.button, { backgroundColor: colors.primary }]}
@@ -272,7 +283,7 @@ function ManuallyAdd({ navigation }) {
         <Text style={styles.buttonText}>Save Puzzle</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={[styles.button, { backgroundColor: colors.secondary }]}
+        style={[styles.button, { backgroundColor: colors.primary }]}
         onPress={() => navigation.goBack()}
       >
         <Text style={styles.buttonText}>Back to Add Puzzles</Text>
@@ -325,11 +336,31 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     alignItems: "center",
   },
+  iconButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "80%",
+    marginVertical: 20,
+  },
+  iconButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 15,
+    borderRadius: 10,
+    backgroundColor: "#f0f0f0",
+    width: "45%",
+  },
+  iconButtonText: {
+    marginTop: 5,
+    fontFamily: "Sora",
+    fontSize: 14,
+  },
   button: {
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
     marginVertical: 10,
+    width: "80%",
   },
   buttonText: {
     color: "white",

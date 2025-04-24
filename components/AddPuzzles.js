@@ -34,7 +34,7 @@ function AddPuzzles({ navigation }) {
       </View>
       <View style={styles.buttonContainer}>
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: colors.secondary }]}
+          style={[styles.button, { backgroundColor: colors.primary }]}
           onPress={() => navigation.navigate("Home")}
         >
           <Text style={styles.buttonText}>Home</Text>

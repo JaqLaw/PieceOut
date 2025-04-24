@@ -36,8 +36,9 @@ const MyTheme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: "#b76cc3",
+    primary: "#6C2D9E",
     secondary: "#763aab",
+    danger: "#9e2424", // Red color for delete and reset buttons
   },
   fonts: {
     regular: "Sora",
@@ -236,6 +237,15 @@ function HomeScreen({ navigation }) {
         <Image source={titleImage} style={styles.titleImage} />
       </View>
 
+      <View style={styles.addButtonContainer}>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => navigation.navigate("Add Puzzles")}
+        >
+          <Text style={styles.addButtonText}>+</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Search Box */}
       <View style={styles.searchContainer}>
         <TextInput
@@ -385,14 +395,7 @@ function HomeScreen({ navigation }) {
         </View>
       )}
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: MyTheme.colors.primary }]}
-          onPress={() => navigation.navigate("Add Puzzles")}
-        >
-          <Text style={styles.buttonText}>Add Puzzle</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Old Add Puzzle button removed */}
       <FlatList
         data={getFilteredAndSortedPuzzles()}
         keyExtractor={(item) => item.id.toString()}
@@ -434,10 +437,7 @@ function HomeScreen({ navigation }) {
               </TouchableOpacity>
               <View style={styles.buttonsColumn}>
                 <TouchableOpacity
-                  style={[
-                    styles.editButton,
-                    { backgroundColor: MyTheme.colors.primary },
-                  ]}
+                  style={[styles.editButton, { backgroundColor: "#6C2D9E" }]}
                   onPress={() =>
                     navigation.navigate("Edit Puzzle", { puzzleId: item.id })
                   }
@@ -517,7 +517,7 @@ const styles = StyleSheet.create({
   headingContainer: {
     flexDirection: "row", // Arrange items in a row
     alignItems: "center",
-    justifyContent: "center", // Center the items
+    justifyContent: "center", // Center items horizontally
     marginTop: 20,
     marginBottom: 10,
   },
@@ -529,6 +529,30 @@ const styles = StyleSheet.create({
   titleImage: {
     width: 240,
     height: 60,
+  },
+  addButtonContainer: {
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  addButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25, // Makes it a circle
+    backgroundColor: MyTheme.colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  addButtonText: {
+    color: "white",
+    fontSize: 30,
+    fontWeight: "bold",
+    lineHeight: 50,
+    textAlign: "center",
   },
   searchContainer: {
     marginVertical: 10,
@@ -549,15 +573,20 @@ const styles = StyleSheet.create({
   },
   filterToggleButton: {
     padding: 10,
-    backgroundColor: "#dbb3e3",
+    backgroundColor: MyTheme.colors.primary,
     borderRadius: 5,
     width: "70%",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   filterToggleText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#4a2356",
+    color: "#FFFFFF",
     fontFamily: "Sora-Bold",
   },
   filtersContainer: {
@@ -604,7 +633,7 @@ const styles = StyleSheet.create({
   },
   clearFiltersButton: {
     marginTop: 15,
-    backgroundColor: "#ff6666",
+    backgroundColor: MyTheme.colors.danger,
     padding: 10,
     borderRadius: 5,
     alignItems: "center",
@@ -692,9 +721,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     justifyContent: "center",
     marginBottom: 10,
+    backgroundColor: MyTheme.colors.primary, // Set default color using theme
   },
   deleteButton: {
-    backgroundColor: "#9e2424",
+    backgroundColor: MyTheme.colors.danger,
     paddingVertical: 8,
     paddingHorizontal: 15,
     borderRadius: 5,

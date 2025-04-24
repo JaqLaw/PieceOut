@@ -4,7 +4,6 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   TouchableOpacity,
   Image,
   ScrollView,
@@ -15,6 +14,7 @@ import {
 import { useTheme } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
+import { MaterialIcons } from "@expo/vector-icons";
 import realm from "../realm";
 
 function EditPuzzle({ route, navigation }) {
@@ -291,9 +291,20 @@ function EditPuzzle({ route, navigation }) {
           value={notes}
           onChangeText={setNotes}
         />
-        <View style={styles.buttonContainer}>
-          <Button title="Pick an image from gallery" onPress={pickImage} />
-          <Button title="Take a photo" onPress={takePhoto} />
+        <View style={styles.iconButtonContainer}>
+          <TouchableOpacity style={styles.iconButton} onPress={pickImage}>
+            <MaterialIcons
+              name="photo-library"
+              size={40}
+              color={colors.primary}
+            />
+            <Text style={styles.iconButtonText}>Gallery</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.iconButton} onPress={takePhoto}>
+            <MaterialIcons name="camera-alt" size={40} color={colors.primary} />
+            <Text style={styles.iconButtonText}>Camera</Text>
+          </TouchableOpacity>
         </View>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: colors.primary }]}
@@ -359,6 +370,25 @@ const styles = StyleSheet.create({
   buttonContainer: {
     marginVertical: 10,
     alignItems: "center",
+  },
+  iconButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "80%",
+    marginVertical: 20,
+  },
+  iconButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 15,
+    borderRadius: 10,
+    backgroundColor: "#f0f0f0",
+    width: "45%",
+  },
+  iconButtonText: {
+    marginTop: 5,
+    fontFamily: "Sora",
+    fontSize: 14,
   },
   button: {
     paddingVertical: 10,

@@ -479,7 +479,11 @@ function Timer({ route, navigation }) {
 
         <View style={styles.timerButtonsContainer}>
           <TouchableOpacity
-            style={[styles.timerButton, styles.resetButton]}
+            style={[
+              styles.timerButton,
+              styles.resetButton,
+              { backgroundColor: colors.danger },
+            ]}
             onPress={resetTimer}
           >
             <Text style={styles.buttonText}>Reset</Text>
@@ -691,7 +695,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   resetButton: {
-    backgroundColor: "#9e2424", // Same style as delete button
     height: 40, // Half the height of the play/pause button
   },
   submitButton: {
