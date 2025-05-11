@@ -10,6 +10,8 @@ import {
   AppState,
   TextInput,
   Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -231,231 +233,236 @@ function HomeScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.appContainer}>
-      <View style={styles.headingContainer}>
-        <Image source={logo} style={styles.image} />
-        <Image source={titleImage} style={styles.titleImage} />
-      </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.appContainer}>
+        <View style={styles.headingContainer}>
+          <Image source={logo} style={styles.image} />
+          <Image source={titleImage} style={styles.titleImage} />
+        </View>
 
-      <View style={styles.addButtonContainer}>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => navigation.navigate("Add Puzzles")}
-        >
-          <Text style={styles.addButtonText}>+</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Search Box */}
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search puzzles by name, brand, or notes"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          clearButtonMode="always"
-        />
-      </View>
-
-      {/* Filters and Sort Controls Toggle */}
-      <View style={styles.filterToggleContainer}>
-        <TouchableOpacity
-          style={styles.filterToggleButton}
-          onPress={() => setShowFilters(!showFilters)}
-        >
-          <Text style={styles.filterToggleText}>
-            {showFilters ? "Hide Filters & Sort" : "Show Filters & Sort"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Filters and Sort Controls */}
-      {showFilters && (
-        <View style={styles.filtersContainer}>
-          {/* Piece Count Filter */}
-          <View style={styles.filterSection}>
-            <Text style={styles.filterLabel}>Filter by Pieces:</Text>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={pieceFilter}
-                style={styles.picker}
-                onValueChange={(value) => setPieceFilter(value)}
-                itemStyle={getPickerItemStyle()}
-              >
-                <Picker.Item
-                  label="All Piece Counts"
-                  value="all"
-                  style={getPickerItemStyle()}
-                />
-                {pieceOptions.map((pieces) => (
-                  <Picker.Item
-                    key={pieces}
-                    label={pieces.toString()}
-                    value={pieces}
-                    style={getPickerItemStyle()}
-                  />
-                ))}
-              </Picker>
-            </View>
-          </View>
-
-          {/* Brand Filter */}
-          <View style={styles.filterSection}>
-            <Text style={styles.filterLabel}>Filter by Brand:</Text>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={brandFilter}
-                style={styles.picker}
-                onValueChange={(value) => setBrandFilter(value)}
-                itemStyle={getPickerItemStyle()}
-              >
-                <Picker.Item
-                  label="All Brands"
-                  value="all"
-                  style={getPickerItemStyle()}
-                />
-                {brandOptions.map((brand) => (
-                  <Picker.Item
-                    key={brand}
-                    label={brand}
-                    value={brand}
-                    style={getPickerItemStyle()}
-                  />
-                ))}
-              </Picker>
-            </View>
-          </View>
-
-          {/* Sort Options */}
-          <View style={styles.filterSection}>
-            <Text style={styles.filterLabel}>Sort By:</Text>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={sortOption}
-                style={styles.picker}
-                onValueChange={(value) => setSortOption(value)}
-                itemStyle={getPickerItemStyle()}
-              >
-                <Picker.Item
-                  label="Pieces: Low to High"
-                  value="piecesLowToHigh"
-                  style={getPickerItemStyle()}
-                />
-                <Picker.Item
-                  label="Pieces: High to Low"
-                  value="piecesHighToLow"
-                  style={getPickerItemStyle()}
-                />
-                <Picker.Item
-                  label="Name: A to Z"
-                  value="nameAToZ"
-                  style={getPickerItemStyle()}
-                />
-                <Picker.Item
-                  label="Name: Z to A"
-                  value="nameZToA"
-                  style={getPickerItemStyle()}
-                />
-                <Picker.Item
-                  label="Date Added: Newest First"
-                  value="dateAddedDesc"
-                  style={getPickerItemStyle()}
-                />
-                <Picker.Item
-                  label="Date Added: Oldest First"
-                  value="dateAddedAsc"
-                  style={getPickerItemStyle()}
-                />
-                <Picker.Item
-                  label="Last Completed: Newest First"
-                  value="lastCompletedDesc"
-                  style={getPickerItemStyle()}
-                />
-                <Picker.Item
-                  label="Last Completed: Oldest First"
-                  value="lastCompletedAsc"
-                  style={getPickerItemStyle()}
-                />
-              </Picker>
-            </View>
-          </View>
-
-          {/* Clear Filters Button */}
+        <View style={styles.addButtonContainer}>
           <TouchableOpacity
-            style={styles.clearFiltersButton}
-            onPress={() => {
-              setSearchQuery("");
-              setPieceFilter(null);
-              setBrandFilter(null);
-              setSortOption("piecesLowToHigh");
-            }}
+            style={styles.addButton}
+            onPress={() => navigation.navigate("Add Puzzles")}
           >
-            <Text style={styles.clearFiltersText}>Clear All Filters</Text>
+            <Text style={styles.addButtonText}>+</Text>
           </TouchableOpacity>
         </View>
-      )}
 
-      {/* Old Add Puzzle button removed */}
-      <FlatList
-        data={getFilteredAndSortedPuzzles()}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.listItem}>
-            <View style={styles.itemContainer}>
-              <TouchableOpacity
-                style={styles.puzzleTouchable}
-                onPress={() =>
-                  navigation.navigate("Timer", { puzzleId: item.id })
-                }
-              >
-                <View style={styles.contentRow}>
-                  <Image
-                    source={
-                      item.imageUri
-                        ? { uri: item.imageUri }
-                        : require("./assets/images/placeholder.png") // Add a placeholder image
-                    }
-                    style={styles.listImage}
+        {/* Search Box */}
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search puzzles by name, brand, or notes"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            clearButtonMode="always"
+          />
+        </View>
+
+        {/* Filters and Sort Controls Toggle */}
+        <View style={styles.filterToggleContainer}>
+          <TouchableOpacity
+            style={styles.filterToggleButton}
+            onPress={() => setShowFilters(!showFilters)}
+          >
+            <Text style={styles.filterToggleText}>
+              {showFilters ? "Hide Filters & Sort" : "Show Filters & Sort"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Filters and Sort Controls */}
+        {showFilters && (
+          <View style={styles.filtersContainer}>
+            {/* Piece Count Filter */}
+            <View style={styles.filterSection}>
+              <Text style={styles.filterLabel}>Filter by Pieces:</Text>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={pieceFilter}
+                  style={styles.picker}
+                  onValueChange={(value) => setPieceFilter(value)}
+                  itemStyle={getPickerItemStyle()}
+                >
+                  <Picker.Item
+                    label="All Piece Counts"
+                    value="all"
+                    style={getPickerItemStyle()}
                   />
-                  <View style={styles.listTextContainer}>
-                    <Text style={styles.listTitle}>{item.name}</Text>
-                    <Text style={styles.listText}>{item.brand}</Text>
-                    <Text style={styles.listText}>{item.pieces} pieces</Text>
-                    <Text style={styles.listText}>Notes: {item.notes}</Text>
-                    <Text style={styles.listText}>
-                      Best Time:{" "}
-                      {`${String(item.bestTimeHours || 0).padStart(
-                        2,
-                        "0"
-                      )}:${String(item.bestTimeMinutes || 0).padStart(
-                        2,
-                        "0"
-                      )}:${String(item.bestTimeSeconds || 0).padStart(2, "0")}`}
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-              <View style={styles.buttonsColumn}>
-                <TouchableOpacity
-                  style={[styles.editButton, { backgroundColor: "#6C2D9E" }]}
-                  onPress={() =>
-                    navigation.navigate("Edit Puzzle", { puzzleId: item.id })
-                  }
-                >
-                  <Text style={styles.buttonText}>Edit</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={() => deletePuzzleItem(item.id)}
-                >
-                  <Text style={styles.deleteButtonText}>Delete</Text>
-                </TouchableOpacity>
+                  {pieceOptions.map((pieces) => (
+                    <Picker.Item
+                      key={pieces}
+                      label={pieces.toString()}
+                      value={pieces}
+                      style={getPickerItemStyle()}
+                    />
+                  ))}
+                </Picker>
               </View>
             </View>
+
+            {/* Brand Filter */}
+            <View style={styles.filterSection}>
+              <Text style={styles.filterLabel}>Filter by Brand:</Text>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={brandFilter}
+                  style={styles.picker}
+                  onValueChange={(value) => setBrandFilter(value)}
+                  itemStyle={getPickerItemStyle()}
+                >
+                  <Picker.Item
+                    label="All Brands"
+                    value="all"
+                    style={getPickerItemStyle()}
+                  />
+                  {brandOptions.map((brand) => (
+                    <Picker.Item
+                      key={brand}
+                      label={brand}
+                      value={brand}
+                      style={getPickerItemStyle()}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            </View>
+
+            {/* Sort Options */}
+            <View style={styles.filterSection}>
+              <Text style={styles.filterLabel}>Sort By:</Text>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={sortOption}
+                  style={styles.picker}
+                  onValueChange={(value) => setSortOption(value)}
+                  itemStyle={getPickerItemStyle()}
+                >
+                  <Picker.Item
+                    label="Pieces: Low to High"
+                    value="piecesLowToHigh"
+                    style={getPickerItemStyle()}
+                  />
+                  <Picker.Item
+                    label="Pieces: High to Low"
+                    value="piecesHighToLow"
+                    style={getPickerItemStyle()}
+                  />
+                  <Picker.Item
+                    label="Name: A to Z"
+                    value="nameAToZ"
+                    style={getPickerItemStyle()}
+                  />
+                  <Picker.Item
+                    label="Name: Z to A"
+                    value="nameZToA"
+                    style={getPickerItemStyle()}
+                  />
+                  <Picker.Item
+                    label="Date Added: Newest First"
+                    value="dateAddedDesc"
+                    style={getPickerItemStyle()}
+                  />
+                  <Picker.Item
+                    label="Date Added: Oldest First"
+                    value="dateAddedAsc"
+                    style={getPickerItemStyle()}
+                  />
+                  <Picker.Item
+                    label="Last Completed: Newest First"
+                    value="lastCompletedDesc"
+                    style={getPickerItemStyle()}
+                  />
+                  <Picker.Item
+                    label="Last Completed: Oldest First"
+                    value="lastCompletedAsc"
+                    style={getPickerItemStyle()}
+                  />
+                </Picker>
+              </View>
+            </View>
+
+            {/* Clear Filters Button */}
+            <TouchableOpacity
+              style={styles.clearFiltersButton}
+              onPress={() => {
+                setSearchQuery("");
+                setPieceFilter(null);
+                setBrandFilter(null);
+                setSortOption("piecesLowToHigh");
+              }}
+            >
+              <Text style={styles.clearFiltersText}>Clear All Filters</Text>
+            </TouchableOpacity>
           </View>
         )}
-      />
-    </View>
+
+        {/* Old Add Puzzle button removed */}
+        <FlatList
+          data={getFilteredAndSortedPuzzles()}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.listItem}>
+              <View style={styles.itemContainer}>
+                <TouchableOpacity
+                  style={styles.puzzleTouchable}
+                  onPress={() =>
+                    navigation.navigate("Timer", { puzzleId: item.id })
+                  }
+                >
+                  <View style={styles.contentRow}>
+                    <Image
+                      source={
+                        item.imageUri
+                          ? { uri: item.imageUri }
+                          : require("./assets/images/placeholder.png") // Add a placeholder image
+                      }
+                      style={styles.listImage}
+                    />
+                    <View style={styles.listTextContainer}>
+                      <Text style={styles.listTitle}>{item.name}</Text>
+                      <Text style={styles.listText}>{item.brand}</Text>
+                      <Text style={styles.listText}>{item.pieces} pieces</Text>
+                      <Text style={styles.listText}>Notes: {item.notes}</Text>
+                      <Text style={styles.listText}>
+                        Best Time:{" "}
+                        {`${String(item.bestTimeHours || 0).padStart(
+                          2,
+                          "0"
+                        )}:${String(item.bestTimeMinutes || 0).padStart(
+                          2,
+                          "0"
+                        )}:${String(item.bestTimeSeconds || 0).padStart(
+                          2,
+                          "0"
+                        )}`}
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+                <View style={styles.buttonsColumn}>
+                  <TouchableOpacity
+                    style={[styles.editButton, { backgroundColor: "#6C2D9E" }]}
+                    onPress={() =>
+                      navigation.navigate("Edit Puzzle", { puzzleId: item.id })
+                    }
+                  >
+                    <Text style={styles.buttonText}>Edit</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => deletePuzzleItem(item.id)}
+                  >
+                    <Text style={styles.deleteButtonText}>Delete</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          )}
+        />
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -685,13 +692,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listTitle: {
-    fontSize: 18,
-    fontWeight: "bold", // Make the item name bold
+    fontSize: 16,
+    fontWeight: "bold",
     marginBottom: 5,
     fontFamily: "Sora",
   },
   listText: {
-    fontSize: 14,
+    fontSize: 12,
     color: "#555",
     fontFamily: "Sora-Light",
   },

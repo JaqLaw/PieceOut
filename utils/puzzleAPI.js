@@ -1,0 +1,151 @@
+import axios from "axios";
+import { parseStringPromise } from "react-native-xml2js";
+
+/**
+ * Main function to search for puzzle info using barcode
+ * Tries multiple APIs in sequence
+ */
+export async function searchPuzzleByBarcode(barcode) {
+  // Try BoardGameGeek first
+  try {
+    console.log("Searching BoardGameGeek for barcode:", barcode);
+    const bggResult = await searchBoardGameGeek(barcode);
+    if (bggResult) {
+      console.log("Found puzzle in BoardGameGeek:", bggResult.name);
+      return bggResult;
+    }
+  } catch (error) {
+    console.log("BGG search failed:", error.message);
+  }
+
+  // Fall back to UPC Database if BGG fails
+  try {
+    console.log("Searching UPC Database for barcode:", barcode);
+    const upcResult = await searchUPCDatabase(barcode);
+    if (upcResult) {
+      console.log("Found puzzle in UPC Database:", upcResult.name);
+      return upcResult;
+    }
+  } catch (error) {
+    console.log("UPC Database search failed:", error.message);
+  }
+
+  // Return null if both searches fail
+  console.log("No puzzle found for barcode:", barcode);
+  return null;
+}
+
+/**
+ * Search BoardGameGeek for puzzle info
+ */
+async function searchBoardGameGeek(barcode) {
+  // First try direct barcode search
+  try {
+    // BGG doesn't have direct barcode search, so we search by the barcode as keyword
+    const searchUrl = `https://boardgamegeek.com/xmlapi2/search?query=${barcode}&type=boardgame,boardgameexpansion`;
+    const { data } = await axios.get(searchUrl);
+
+    // Parse XML response
+    const result = await parseStringPromise(data);
+
+    // Check if any results were found
+    if (!result.items.item || result.items.item.length === 0) {
+      return null;
+    }
+
+    // Get details for the first result
+    const gameId = result.items.item[0].$.id;
+    const detailsUrl = `https://boardgamegeek.com/xmlapi2/thing?id=${gameId}&stats=1`;
+    const detailsResponse = await axios.get(detailsUrl);
+    const details = await parseStringPromise(detailsResponse.data);
+
+    const item = details.items.item[0];
+
+    // Check if it's actually a puzzle (has "puzzle" category)
+    const isPuzzle = item.link?.some(
+      (link) =>
+        link.$.type === "boardgamecategory" &&
+        link.$.value.toLowerCase().includes("puzzle")
+    );
+
+    // If it's not explicitly a puzzle, we'll still return it if there's an exact barcode match
+
+    // Extract puzzle information
+    return {
+      name: item.name?.[0].$.value || "",
+      brand: extractPublisher(item),
+      image: item.image?.[0] || null,
+      pieceCount: extractPieceCount(item.description?.[0] || ""),
+      year: item.yearpublished?.[0]?.$.value || "",
+      description: item.description?.[0] || "",
+      source: "BoardGameGeek",
+    };
+  } catch (error) {
+    console.error("Error in BGG search:", error.message);
+    return null;
+  }
+}
+
+/**
+ * Search UPC Database for puzzle info
+ */
+async function searchUPCDatabase(barcode) {
+  try {
+    const { data } = await axios.get(
+      `https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`
+    );
+
+    if (data.items && data.items.length > 0) {
+      const item = data.items[0];
+      return {
+        name: item.title,
+        brand: item.brand,
+        image: item.images?.length > 0 ? item.images[0] : null,
+        pieceCount: extractPieceCountFromTitle(item.title),
+        year: extractYearFromTitle(item.title),
+        description: item.description || "",
+        source: "UPC Database",
+      };
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error in UPC Database search:", error.message);
+    return null;
+  }
+}
+
+// Helper functions
+function extractPublisher(item) {
+  if (!item.link) return "";
+
+  const publishers = item.link
+    .filter((link) => link.$.type === "boardgamepublisher")
+    .map((link) => link.$.value);
+
+  return publishers.length > 0 ? publishers[0] : "";
+}
+
+function extractPieceCount(description) {
+  if (!description) return "";
+
+  // Look for common patterns in description
+  const pieceMatch = description.match(/(\d+)(?:\s*-?\s*)(piece|pc|pieces)/i);
+  return pieceMatch ? pieceMatch[1] : "";
+}
+
+function extractPieceCountFromTitle(title) {
+  if (!title) return "";
+
+  // Common patterns: "1000 piece", "1000-piece", "1000 pc"
+  const pieceMatch = title.match(/(\d+)(?:\s*-?\s*)(piece|pc|pieces)/i);
+  return pieceMatch ? pieceMatch[1] : "";
+}
+
+function extractYearFromTitle(title) {
+  if (!title) return "";
+
+  // Look for a year pattern (4 digits, typically starting with 19 or 20)
+  const yearMatch = title.match(/(19|20)\d{2}/);
+  return yearMatch ? yearMatch[0] : "";
+}

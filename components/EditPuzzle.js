@@ -10,6 +10,8 @@ import {
   Alert,
   Platform,
   Linking,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
@@ -250,76 +252,82 @@ function EditPuzzle({ route, navigation }) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        <Text style={styles.text}>Edit Puzzle Item</Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.container}>
+          <Text style={styles.text}>Edit Puzzle Item</Text>
 
-        {/* Display image at the top */}
-        <View style={styles.imageContainer}>
-          {imageUri ? (
-            <Image source={{ uri: imageUri }} style={styles.thumbnailImage} />
-          ) : (
-            <Image
-              source={require("../assets/images/placeholder.png")}
-              style={styles.thumbnailImage}
-            />
-          )}
-        </View>
+          {/* Display image at the top */}
+          <View style={styles.imageContainer}>
+            {imageUri ? (
+              <Image source={{ uri: imageUri }} style={styles.thumbnailImage} />
+            ) : (
+              <Image
+                source={require("../assets/images/placeholder.png")}
+                style={styles.thumbnailImage}
+              />
+            )}
+          </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Name"
-          value={name}
-          onChangeText={setName}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Brand"
-          value={brand}
-          onChangeText={setBrand}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Number of Pieces"
-          value={pieces}
-          onChangeText={setPieces}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Notes"
-          value={notes}
-          onChangeText={setNotes}
-        />
-        <View style={styles.iconButtonContainer}>
-          <TouchableOpacity style={styles.iconButton} onPress={pickImage}>
-            <MaterialIcons
-              name="photo-library"
-              size={40}
-              color={colors.primary}
-            />
-            <Text style={styles.iconButtonText}>Gallery</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Name"
+            value={name}
+            onChangeText={setName}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Brand"
+            value={brand}
+            onChangeText={setBrand}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Number of Pieces"
+            value={pieces}
+            onChangeText={setPieces}
+            keyboardType="numeric"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Notes"
+            value={notes}
+            onChangeText={setNotes}
+          />
+          <View style={styles.iconButtonContainer}>
+            <TouchableOpacity style={styles.iconButton} onPress={pickImage}>
+              <MaterialIcons
+                name="photo-library"
+                size={40}
+                color={colors.primary}
+              />
+              <Text style={styles.iconButtonText}>Gallery</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.iconButton} onPress={takePhoto}>
+              <MaterialIcons
+                name="camera-alt"
+                size={40}
+                color={colors.primary}
+              />
+              <Text style={styles.iconButtonText}>Camera</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: colors.primary }]}
+            onPress={updatePuzzleItem}
+          >
+            <Text style={styles.buttonText}>Update Puzzle</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity style={styles.iconButton} onPress={takePhoto}>
-            <MaterialIcons name="camera-alt" size={40} color={colors.primary} />
-            <Text style={styles.iconButtonText}>Camera</Text>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: colors.secondary }]}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.buttonText}>Cancel</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: colors.primary }]}
-          onPress={updatePuzzleItem}
-        >
-          <Text style={styles.buttonText}>Update Puzzle</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: colors.secondary }]}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.buttonText}>Cancel</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </TouchableWithoutFeedback>
   );
 }
 

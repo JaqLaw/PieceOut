@@ -32,12 +32,13 @@ function AddPuzzles({ navigation }) {
           <Text style={styles.buttonText}>Manually Add</Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.buttonContainer}>
+      <View style={styles.spacer} />
+      <View style={styles.homeButtonContainer}>
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: colors.primary }]}
+          style={[styles.homeButton, { backgroundColor: colors.primary }]}
           onPress={() => navigation.navigate("Home")}
         >
-          <Text style={styles.buttonText}>Home</Text>
+          <Text style={styles.homeButtonText}>Home</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -64,14 +65,35 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     alignItems: "center",
   },
+  homeButtonContainer: {
+    marginVertical: 25,
+    alignItems: "center",
+    paddingBottom: 10,
+  },
+  spacer: {
+    flex: 1, // Reduced from 1 to bring the button up
+  },
   button: {
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
   },
+  homeButton: {
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    width: 200,
+  },
   buttonText: {
     color: "white",
     fontSize: 16,
+    textAlign: "center",
+    fontFamily: "Sora",
+  },
+  homeButtonText: {
+    color: "white",
+    fontSize: 22,
+    fontWeight: "bold",
     textAlign: "center",
     fontFamily: "Sora",
   },

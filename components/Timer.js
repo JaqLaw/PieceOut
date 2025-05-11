@@ -10,6 +10,8 @@ import {
   FlatList,
   Alert,
   AppState,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { Swipeable } from "react-native-gesture-handler";
@@ -433,193 +435,199 @@ function Timer({ route, navigation }) {
   }
 
   return (
-    <View style={styles.container}>
-      {/* Back button */}
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-      >
-        <Text style={styles.backButtonText}>← Back</Text>
-      </TouchableOpacity>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        {/* Back button */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.backButtonText}>← Back</Text>
+        </TouchableOpacity>
 
-      {/* Puzzle Info */}
-      <View style={styles.puzzleInfoContainer}>
-        <Image
-          source={
-            puzzleItem.imageUri
-              ? { uri: puzzleItem.imageUri }
-              : require("../assets/images/placeholder.png")
-          }
-          style={styles.puzzleImage}
-        />
-        <View style={styles.puzzleDetails}>
-          <Text style={styles.puzzleName}>{puzzleItem.name}</Text>
-          <Text style={styles.puzzleText}>{puzzleItem.brand}</Text>
-          <Text style={styles.puzzleText}>{puzzleItem.pieces} pieces</Text>
-        </View>
-        <View style={styles.bestTimeContainer}>
-          <Text style={styles.bestTimeLabel}>Best Time</Text>
-          <Text style={styles.bestTimeText}>
-            {`${String(puzzleItem.bestTimeHours || 0).padStart(
-              2,
-              "0"
-            )}:${String(puzzleItem.bestTimeMinutes || 0).padStart(
-              2,
-              "0"
-            )}:${String(puzzleItem.bestTimeSeconds || 0).padStart(2, "0")}`}
-          </Text>
-          <Text style={styles.bestTimeLabel}>Best PPM</Text>
-          <Text style={styles.bestTimeText}>{getBestPPM()}</Text>
-        </View>
-      </View>
-
-      {/* Stopwatch */}
-      <View style={styles.timerContainer}>
-        <Text style={styles.timerDisplay}>{formatTime(time)}</Text>
-
-        <View style={styles.timerButtonsContainer}>
-          <TouchableOpacity
-            style={[
-              styles.timerButton,
-              styles.resetButton,
-              { backgroundColor: colors.danger },
-            ]}
-            onPress={resetTimer}
-          >
-            <Text style={styles.buttonText}>Reset</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.timerButton,
-              styles.toggleButton,
-              { backgroundColor: colors.primary },
-            ]}
-            onPress={toggleTimer}
-          >
-            <Icon name={isRunning ? "pause" : "play"} size={30} color="white" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.timerButton,
-              styles.submitButton,
-              { backgroundColor: colors.primary },
-            ]}
-            onPress={submitStopwatchTime}
-          >
-            <Text style={styles.buttonText}>Submit</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Manual Time Entry */}
-      <View style={styles.manualTimeContainer}>
-        <Text style={styles.sectionTitle}>Manually Log Time:</Text>
-        <View style={styles.timeInputRow}>
-          <TextInput
-            style={styles.timeInput}
-            placeholder="HH"
-            value={hours}
-            onChangeText={setHours}
-            keyboardType="numeric"
-            maxLength={2}
+        {/* Puzzle Info */}
+        <View style={styles.puzzleInfoContainer}>
+          <Image
+            source={
+              puzzleItem.imageUri
+                ? { uri: puzzleItem.imageUri }
+                : require("../assets/images/placeholder.png")
+            }
+            style={styles.puzzleImage}
           />
-          <Text style={styles.timeSeparator}>:</Text>
-          <TextInput
-            style={styles.timeInput}
-            placeholder="MM"
-            value={minutes}
-            onChangeText={setMinutes}
-            keyboardType="numeric"
-            maxLength={2}
-          />
-          <Text style={styles.timeSeparator}>:</Text>
-          <TextInput
-            style={styles.timeInput}
-            placeholder="SS"
-            value={seconds}
-            onChangeText={setSeconds}
-            keyboardType="numeric"
-            maxLength={2}
-          />
-
-          <TouchableOpacity
-            style={[styles.logButton, { backgroundColor: colors.primary }]}
-            onPress={submitManualTime}
-          >
-            <Text style={styles.buttonText}>Log</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Time Records */}
-      <View style={styles.recordsContainer}>
-        <Text style={styles.sectionTitle}>My Times</Text>
-
-        {/* Table Headers */}
-        <View style={styles.tableHeader}>
-          <Text style={[styles.headerCell, { flex: 1.5 }]}>Date</Text>
-          <Text style={[styles.headerCell, { flex: 1 }]}>Time</Text>
-          <Text style={[styles.headerCell, { flex: 0.8 }]}>PPM</Text>
+          <View style={styles.puzzleDetails}>
+            <Text style={styles.puzzleName}>{puzzleItem.name}</Text>
+            <Text style={styles.puzzleText}>{puzzleItem.brand}</Text>
+            <Text style={styles.puzzleText}>{puzzleItem.pieces} pieces</Text>
+          </View>
+          <View style={styles.bestTimeContainer}>
+            <Text style={styles.bestTimeLabel}>Best Time</Text>
+            <Text style={styles.bestTimeText}>
+              {`${String(puzzleItem.bestTimeHours || 0).padStart(
+                2,
+                "0"
+              )}:${String(puzzleItem.bestTimeMinutes || 0).padStart(
+                2,
+                "0"
+              )}:${String(puzzleItem.bestTimeSeconds || 0).padStart(2, "0")}`}
+            </Text>
+            <Text style={styles.bestTimeLabel}>Best PPM</Text>
+            <Text style={styles.bestTimeText}>{getBestPPM()}</Text>
+          </View>
         </View>
 
-        {timeRecords.length === 0 ? (
-          <Text style={styles.noRecordsText}>No times recorded yet</Text>
-        ) : (
-          <FlatList
-            style={styles.recordsList}
-            contentContainerStyle={styles.recordsListContent}
-            data={timeRecords}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <Swipeable
-                friction={2}
-                overshootRight={false}
-                containerStyle={{ backgroundColor: "#F5F7F3" }}
-                childrenContainerStyle={{ backgroundColor: "#F5F7F3" }}
-                renderRightActions={(progress, dragX) => (
-                  <View
-                    style={{
-                      width: 80,
-                      backgroundColor: "#9e2424",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <TouchableOpacity
+        {/* Stopwatch */}
+        <View style={styles.timerContainer}>
+          <Text style={styles.timerDisplay}>{formatTime(time)}</Text>
+
+          <View style={styles.timerButtonsContainer}>
+            <TouchableOpacity
+              style={[
+                styles.timerButton,
+                styles.resetButton,
+                { backgroundColor: colors.danger },
+              ]}
+              onPress={resetTimer}
+            >
+              <Text style={styles.buttonText}>Reset</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.timerButton,
+                styles.toggleButton,
+                { backgroundColor: colors.primary },
+              ]}
+              onPress={toggleTimer}
+            >
+              <Icon
+                name={isRunning ? "pause" : "play"}
+                size={30}
+                color="white"
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.timerButton,
+                styles.submitButton,
+                { backgroundColor: colors.primary },
+              ]}
+              onPress={submitStopwatchTime}
+            >
+              <Text style={styles.buttonText}>Submit</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Manual Time Entry */}
+        <View style={styles.manualTimeContainer}>
+          <Text style={styles.sectionTitle}>Manually Log Time:</Text>
+          <View style={styles.timeInputRow}>
+            <TextInput
+              style={styles.timeInput}
+              placeholder="HH"
+              value={hours}
+              onChangeText={setHours}
+              keyboardType="numeric"
+              maxLength={2}
+            />
+            <Text style={styles.timeSeparator}>:</Text>
+            <TextInput
+              style={styles.timeInput}
+              placeholder="MM"
+              value={minutes}
+              onChangeText={setMinutes}
+              keyboardType="numeric"
+              maxLength={2}
+            />
+            <Text style={styles.timeSeparator}>:</Text>
+            <TextInput
+              style={styles.timeInput}
+              placeholder="SS"
+              value={seconds}
+              onChangeText={setSeconds}
+              keyboardType="numeric"
+              maxLength={2}
+            />
+
+            <TouchableOpacity
+              style={[styles.logButton, { backgroundColor: colors.primary }]}
+              onPress={submitManualTime}
+            >
+              <Text style={styles.buttonText}>Log</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Time Records */}
+        <View style={styles.recordsContainer}>
+          <Text style={styles.sectionTitle}>My Times</Text>
+
+          {/* Table Headers */}
+          <View style={styles.tableHeader}>
+            <Text style={[styles.headerCell, { flex: 1.5 }]}>Date</Text>
+            <Text style={[styles.headerCell, { flex: 1 }]}>Time</Text>
+            <Text style={[styles.headerCell, { flex: 0.8 }]}>PPM</Text>
+          </View>
+
+          {timeRecords.length === 0 ? (
+            <Text style={styles.noRecordsText}>No times recorded yet</Text>
+          ) : (
+            <FlatList
+              style={styles.recordsList}
+              contentContainerStyle={styles.recordsListContent}
+              data={timeRecords}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <Swipeable
+                  friction={2}
+                  overshootRight={false}
+                  containerStyle={{ backgroundColor: "#F5F7F3" }}
+                  childrenContainerStyle={{ backgroundColor: "#F5F7F3" }}
+                  renderRightActions={(progress, dragX) => (
+                    <View
                       style={{
-                        width: "100%",
-                        height: "100%",
+                        width: 80,
+                        backgroundColor: "#9e2424",
                         justifyContent: "center",
                         alignItems: "center",
                       }}
-                      onPress={() => deleteTimeRecord(item.id)}
                     >
-                      <Text style={{ color: "white", fontWeight: "bold" }}>
-                        Delete
-                      </Text>
-                    </TouchableOpacity>
+                      <TouchableOpacity
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                        onPress={() => deleteTimeRecord(item.id)}
+                      >
+                        <Text style={{ color: "white", fontWeight: "bold" }}>
+                          Delete
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                >
+                  <View style={styles.tableRow}>
+                    <Text style={[styles.tableCell, { flex: 1.5 }]}>
+                      {formatDate(item.date)}
+                    </Text>
+                    <Text style={[styles.tableCell, { flex: 1 }]}>
+                      {formatTime(item.timeInSeconds)}
+                    </Text>
+                    <Text style={[styles.tableCell, { flex: 0.8 }]}>
+                      {item.ppm.toFixed(2)}
+                    </Text>
                   </View>
-                )}
-              >
-                <View style={styles.tableRow}>
-                  <Text style={[styles.tableCell, { flex: 1.5 }]}>
-                    {formatDate(item.date)}
-                  </Text>
-                  <Text style={[styles.tableCell, { flex: 1 }]}>
-                    {formatTime(item.timeInSeconds)}
-                  </Text>
-                  <Text style={[styles.tableCell, { flex: 0.8 }]}>
-                    {item.ppm.toFixed(2)}
-                  </Text>
-                </View>
-              </Swipeable>
-            )}
-          />
-        )}
+                </Swipeable>
+              )}
+            />
+          )}
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 

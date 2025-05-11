@@ -1,12 +1,24 @@
 import React from "react";
-import { StyleSheet, View, Text, Button } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  Button,
+  Keyboard,
+  TouchableWithoutFeedback,
+} from "react-native";
 
 function Search({ navigation }) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Search Page</Text>
-      <Button title="Back to Add Puzzles" onPress={() => navigation.goBack()} />
-    </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <Text style={styles.text}>Search Page</Text>
+        <Button
+          title="Back to Add Puzzles"
+          onPress={() => navigation.goBack()}
+        />
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 

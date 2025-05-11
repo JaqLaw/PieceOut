@@ -9,6 +9,9 @@ import {
   Alert,
   Platform,
   Linking,
+  Keyboard,
+  TouchableWithoutFeedback,
+  ScrollView,
 } from "react-native";
 import { useTheme } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
@@ -19,11 +22,14 @@ import realm from "../realm";
 // Import the placeholder image directly
 import placeholderImage from "../assets/images/placeholder.png";
 
-function ManuallyAdd({ navigation }) {
+function ManuallyAdd({ navigation, route }) {
+  // Extract puzzle info from navigation params (if available)
+  const puzzleInfo = route.params?.puzzleInfo || {};
+
   const { colors } = useTheme();
-  const [name, setName] = useState("");
-  const [brand, setBrand] = useState("");
-  const [pieces, setPieces] = useState("");
+  const [name, setName] = useState(puzzleInfo.name || "");
+  const [brand, setBrand] = useState(puzzleInfo.brand || "");
+  const [pieces, setPieces] = useState(puzzleInfo.pieceCount || "");
   const [notes, setNotes] = useState("");
   const [imageUri, setImageUri] = useState(null);
 
@@ -220,75 +226,81 @@ function ManuallyAdd({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Manually Add Puzzle Item</Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <Text style={styles.text}>Manually Add Puzzle Item</Text>
 
-      {/* Display image at the top */}
-      <View style={styles.imageContainer}>
-        <Image
-          source={
-            imageUri
-              ? { uri: imageUri }
-              : require("../assets/images/placeholder.png")
-          }
-          style={styles.thumbnailImage}
-          defaultSource={require("../assets/images/placeholder.png")}
-        />
-      </View>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Brand"
-        value={brand}
-        onChangeText={setBrand}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Number of Pieces"
-        value={pieces}
-        onChangeText={setPieces}
-        keyboardType="numeric"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Notes"
-        value={notes}
-        onChangeText={setNotes}
-      />
-      <View style={styles.iconButtonContainer}>
-        <TouchableOpacity style={styles.iconButton} onPress={pickImage}>
-          <MaterialIcons
-            name="photo-library"
-            size={40}
-            color={colors.primary}
+        {/* Display image at the top */}
+        <View style={styles.imageContainer}>
+          <Image
+            source={
+              imageUri
+                ? { uri: imageUri }
+                : require("../assets/images/placeholder.png")
+            }
+            style={styles.thumbnailImage}
+            defaultSource={require("../assets/images/placeholder.png")}
           />
-          <Text style={styles.iconButtonText}>Gallery</Text>
-        </TouchableOpacity>
+        </View>
 
-        <TouchableOpacity style={styles.iconButton} onPress={takePhoto}>
-          <MaterialIcons name="camera-alt" size={40} color={colors.primary} />
-          <Text style={styles.iconButtonText}>Camera</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Name"
+          value={name}
+          onChangeText={setName}
+          returnKeyType="done"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Brand"
+          value={brand}
+          onChangeText={setBrand}
+          returnKeyType="done"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Number of Pieces"
+          value={pieces}
+          onChangeText={setPieces}
+          keyboardType="numeric"
+          returnKeyType="done"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Notes"
+          value={notes}
+          onChangeText={setNotes}
+          returnKeyType="done"
+        />
+        <View style={styles.iconButtonContainer}>
+          <TouchableOpacity style={styles.iconButton} onPress={pickImage}>
+            <MaterialIcons
+              name="photo-library"
+              size={40}
+              color={colors.primary}
+            />
+            <Text style={styles.iconButtonText}>Gallery</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.iconButton} onPress={takePhoto}>
+            <MaterialIcons name="camera-alt" size={40} color={colors.primary} />
+            <Text style={styles.iconButtonText}>Camera</Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: colors.primary }]}
+          onPress={savePuzzleItem}
+        >
+          <Text style={styles.buttonText}>Save Puzzle</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: colors.primary }]}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.buttonText}>Back to Add Puzzles</Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity
-        style={[styles.button, { backgroundColor: colors.primary }]}
-        onPress={savePuzzleItem}
-      >
-        <Text style={styles.buttonText}>Save Puzzle</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.button, { backgroundColor: colors.primary }]}
-        onPress={() => navigation.goBack()}
-      >
-        <Text style={styles.buttonText}>Back to Add Puzzles</Text>
-      </TouchableOpacity>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -297,23 +309,24 @@ export default ManuallyAdd;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
     padding: 16,
+    paddingTop: 70,
     backgroundColor: "#F5F7F3",
   },
   text: {
-    fontSize: 20,
+    fontSize: 24,
     marginBottom: 20,
     fontFamily: "Sora",
   },
   imageContainer: {
-    width: 200,
-    height: 200,
+    width: 150,
+    height: 150,
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 10,
-    marginBottom: 20,
+    marginBottom: 15,
     justifyContent: "center",
     alignItems: "center",
     overflow: "hidden",
