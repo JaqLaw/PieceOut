@@ -8,6 +8,7 @@ import {
   Alert,
   Platform,
   SafeAreaView,
+  Dimensions,
 } from "react-native";
 import { Camera } from "expo-camera";
 import { useTheme } from "@react-navigation/native";
@@ -22,8 +23,22 @@ function Scan({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
   const { colors } = useTheme();
 
-  // Detect if we're on a simulator
-  const isSimulator = Platform.OS === "ios" && __DEV__;
+  // More accurate simulator detection with safer property access
+  // This will only detect the iOS simulator running on a Mac, not a real iPhone
+  const { width, height } = Dimensions.get("window");
+
+  // Check if we're running on a simulator by using Expo's Constants module
+  // or by checking device characteristics in a safer way
+  const isSimulator =
+    Platform.OS === "ios" &&
+    __DEV__ &&
+    // Check for specific simulator dimensions or other characteristics
+    // that wouldn't match a real iPhone
+    ((width === 1024 && height === 768) || // iPad simulator
+      // Safe check for simulator model name
+      (Platform.constants &&
+        typeof Platform.constants.model === "string" &&
+        Platform.constants.model.toLowerCase().includes("simulator")));
 
   useEffect(() => {
     // Only request camera permissions if not in simulator
@@ -37,11 +52,17 @@ function Scan({ navigation }) {
 
   // Handle a real barcode scan
   const handleBarCodeScanned = async ({ type, data }) => {
+    // Make sure we're not already processing a scan
+    if (scanned) return;
+
     setScanned(true);
     setIsLoading(true);
 
+    // Always log the barcode result for debugging
+    console.log(`Barcode detected - Type: ${type}, Data: ${data}`);
+
     try {
-      console.log("Barcode scanned:", data);
+      // Look up the puzzle info
       const puzzleInfo = await searchPuzzleByBarcode(data);
       setIsLoading(false);
 
@@ -176,7 +197,12 @@ function Scan({ navigation }) {
           ],
         }}
         onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-      />
+        ratio="16:9"
+      >
+        <View style={styles.scannerFrame}>
+          {/* Scanner frame to help user position the barcode */}
+        </View>
+      </Camera>
 
       <View style={styles.overlay}>
         <Text style={styles.overlayText}>Position barcode within frame</Text>

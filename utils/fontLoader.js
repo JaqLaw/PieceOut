@@ -1,4 +1,5 @@
 import * as Font from "expo-font";
+import { MaterialIcons } from "@expo/vector-icons";
 
 export const loadFonts = async () => {
   try {
@@ -12,6 +13,9 @@ export const loadFonts = async () => {
       "Sora-Light": soraFontPath,
       "Sora-Medium": soraFontPath,
       "Sora-Bold": soraFontPath,
+
+      // Preload MaterialIcons font
+      ...MaterialIcons.font,
     });
   } catch (error) {
     console.error("Error in loadFonts:", error);

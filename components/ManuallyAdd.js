@@ -227,79 +227,85 @@ function ManuallyAdd({ navigation, route }) {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
-        <Text style={styles.text}>Manually Add Puzzle Item</Text>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.container}>
+          <Text style={styles.text}>Manually Add Puzzle Item</Text>
 
-        {/* Display image at the top */}
-        <View style={styles.imageContainer}>
-          <Image
-            source={
-              imageUri
-                ? { uri: imageUri }
-                : require("../assets/images/placeholder.png")
-            }
-            style={styles.thumbnailImage}
-            defaultSource={require("../assets/images/placeholder.png")}
-          />
-        </View>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Name"
-          value={name}
-          onChangeText={setName}
-          returnKeyType="done"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Brand"
-          value={brand}
-          onChangeText={setBrand}
-          returnKeyType="done"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Number of Pieces"
-          value={pieces}
-          onChangeText={setPieces}
-          keyboardType="numeric"
-          returnKeyType="done"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Notes"
-          value={notes}
-          onChangeText={setNotes}
-          returnKeyType="done"
-        />
-        <View style={styles.iconButtonContainer}>
-          <TouchableOpacity style={styles.iconButton} onPress={pickImage}>
-            <MaterialIcons
-              name="photo-library"
-              size={40}
-              color={colors.primary}
+          {/* Display image at the top */}
+          <View style={styles.imageContainer}>
+            <Image
+              source={
+                imageUri
+                  ? { uri: imageUri }
+                  : require("../assets/images/placeholder.png")
+              }
+              style={styles.thumbnailImage}
+              defaultSource={require("../assets/images/placeholder.png")}
             />
-            <Text style={styles.iconButtonText}>Gallery</Text>
-          </TouchableOpacity>
+          </View>
 
-          <TouchableOpacity style={styles.iconButton} onPress={takePhoto}>
-            <MaterialIcons name="camera-alt" size={40} color={colors.primary} />
-            <Text style={styles.iconButtonText}>Camera</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Name"
+            value={name}
+            onChangeText={setName}
+            returnKeyType="done"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Brand"
+            value={brand}
+            onChangeText={setBrand}
+            returnKeyType="done"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Number of Pieces"
+            value={pieces}
+            onChangeText={setPieces}
+            keyboardType="numeric"
+            returnKeyType="done"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Notes"
+            value={notes}
+            onChangeText={setNotes}
+            returnKeyType="done"
+          />
+          <View style={styles.iconButtonContainer}>
+            <TouchableOpacity style={styles.iconButton} onPress={pickImage}>
+              <MaterialIcons
+                name="photo-library"
+                size={40}
+                color={colors.primary}
+              />
+              <Text style={styles.iconButtonText}>Gallery</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.iconButton} onPress={takePhoto}>
+              <MaterialIcons
+                name="camera-alt"
+                size={40}
+                color={colors.primary}
+              />
+              <Text style={styles.iconButtonText}>Camera</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: colors.primary }]}
+            onPress={savePuzzleItem}
+          >
+            <Text style={styles.buttonText}>Save Puzzle</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: colors.primary }]}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.buttonText}>Back to Add Puzzles</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: colors.primary }]}
-          onPress={savePuzzleItem}
-        >
-          <Text style={styles.buttonText}>Save Puzzle</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: colors.primary }]}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.buttonText}>Back to Add Puzzles</Text>
-        </TouchableOpacity>
-      </View>
+      </ScrollView>
     </TouchableWithoutFeedback>
   );
 }
@@ -307,6 +313,10 @@ function ManuallyAdd({ navigation, route }) {
 export default ManuallyAdd;
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    paddingVertical: 20,
+  },
   container: {
     flex: 1,
     justifyContent: "flex-start",

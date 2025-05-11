@@ -46,7 +46,13 @@ async function searchBoardGameGeek(barcode) {
     const { data } = await axios.get(searchUrl);
 
     // Parse XML response
-    const result = await parseStringPromise(data);
+    const parser = new xml2js.Parser();
+    const result = await new Promise((resolve, reject) => {
+      parser.parseString(data, (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    });
 
     // Check if any results were found
     if (!result.items.item || result.items.item.length === 0) {
@@ -57,7 +63,14 @@ async function searchBoardGameGeek(barcode) {
     const gameId = result.items.item[0].$.id;
     const detailsUrl = `https://boardgamegeek.com/xmlapi2/thing?id=${gameId}&stats=1`;
     const detailsResponse = await axios.get(detailsUrl);
-    const details = await parseStringPromise(detailsResponse.data);
+    
+    // Parse XML response for details
+    const details = await new Promise((resolve, reject) => {
+      parser.parseString(detailsResponse.data, (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    });
 
     const item = details.items.item[0];
 
@@ -144,13 +157,17 @@ export async function searchPuzzleByName(name) {
 async function searchBoardGameGeekByName(name) {
   try {
     // Search BoardGameGeek by name
-    const searchUrl = `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(
-      name
-    )}&type=boardgame,boardgameexpansion`;
+    const searchUrl = `https://boardgamegeek.com/xmlapi2/search?query=${encodeURIComponent(name)}&type=boardgame,boardgameexpansion`;
     const { data } = await axios.get(searchUrl);
 
     // Parse XML response
-    const result = await parseStringPromise(data);
+    const parser = new xml2js.Parser();
+    const result = await new Promise((resolve, reject) => {
+      parser.parseString(data, (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    });
 
     // Check if any results were found
     if (!result.items.item || result.items.item.length === 0) {
@@ -159,30 +176,36 @@ async function searchBoardGameGeekByName(name) {
 
     // Limit to top 10 results to avoid excessive API calls
     const gameItems = result.items.item.slice(0, 10);
-    const gameIds = gameItems.map((item) => item.$.id).join(",");
+    const gameIds = gameItems.map(item => item.$.id).join(',');
 
     // Get details for all results in a single call
     const detailsUrl = `https://boardgamegeek.com/xmlapi2/thing?id=${gameIds}&stats=1`;
     const detailsResponse = await axios.get(detailsUrl);
-    const details = await parseStringPromise(detailsResponse.data);
+    
+    // Parse XML response for details
+    const details = await new Promise((resolve, reject) => {
+      parser.parseString(detailsResponse.data, (err, result) => {
+        if (err) reject(err);
+        else resolve(result);
+      });
+    });
 
     // Process each item and filter for puzzles
     return details.items.item
-      .filter((item) => {
+      .filter(item => {
         // Check if it's actually a puzzle (has "puzzle" category or "puzzle" in the name)
         const isPuzzleCategory = item.link?.some(
-          (link) =>
+          link => 
             link.$.type === "boardgamecategory" &&
             link.$.value.toLowerCase().includes("puzzle")
         );
-
+        
         const nameLowerCase = item.name?.[0].$.value.toLowerCase() || "";
-        const isPuzzleName =
-          nameLowerCase.includes("puzzle") || nameLowerCase.includes("jigsaw");
-
+        const isPuzzleName = nameLowerCase.includes("puzzle") || nameLowerCase.includes("jigsaw");
+        
         return isPuzzleCategory || isPuzzleName;
       })
-      .map((item) => ({
+      .map(item => ({
         name: item.name?.[0].$.value || "",
         brand: extractPublisher(item),
         image: item.image?.[0] || null,
@@ -192,7 +215,7 @@ async function searchBoardGameGeekByName(name) {
         source: "BoardGameGeek",
       }));
   } catch (error) {
-    console.error("Error in BGG name search:", error.message);
+    console.error("Error in BGG name search:", error, error.stack);
     return [];
   }
 }
